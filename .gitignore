@@ -1,1 +1,11 @@
 .DS_Store
+space-wars
+
+.env
+
+build/
+
+compile_commands.json
+
+.cache
+
