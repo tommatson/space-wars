@@ -129,7 +129,7 @@ void Device::pickPhysicalDevice() {
   }
 
   vkGetPhysicalDeviceProperties(physicalDevice, &properties);
-  std::cout << "physical device: " << properties.deviceName << std::endl;
+  std::cout << "Physical device: " << properties.deviceName << std::endl;
 }
 
 void Device::createLogicalDevice() {
