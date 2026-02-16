@@ -9,8 +9,7 @@
 
 struct PipelineConfigInfo {
   VkViewport viewport;
-  VkRect2D scissor;
-  VkPipelineViewportStateCreateInfo viewportInfo;
+  VkRect2D scissor; 
   VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
   VkPipelineRasterizationStateCreateInfo rasterizationInfo;
   VkPipelineMultisampleStateCreateInfo multisampleInfo;
