@@ -2,6 +2,7 @@
 
 #include "window.hpp"
 #include "pipeline.hpp"
+#include "device.hpp"
 
 class Game {
 public:
@@ -15,6 +16,7 @@ public:
 private:
 
   Window window{WIDTH, HEIGHT, "Space Wars"};
-  Pipeline pipeline{"../shaders/simple_shader.vert.spv", "../shaders/simple_shader.frag.spv"};
+  Device device{window};  
+  Pipeline pipeline{device, "../shaders/simple_shader.vert.spv", "../shaders/simple_shader.frag.spv", Pipeline::defaultPipelineConfigInfo(WIDTH, HEIGHT)};
 
 };
