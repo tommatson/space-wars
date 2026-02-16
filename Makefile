@@ -7,7 +7,7 @@ LDFLAGS = -L$(VULKAN_SDK_PATH)/lib -Wl,-rpath,$(VULKAN_SDK_PATH)/lib `pkg-config
 
 BUILD_DIR = build
 TARGET = $(BUILD_DIR)/space-wars
-SRCS = main.cpp
+SRCS = $(wildcard *.cpp)
 OBJS = $(SRCS:%.cpp=$(BUILD_DIR)/%.o)
 
 
