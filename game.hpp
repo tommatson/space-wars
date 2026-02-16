@@ -1,6 +1,7 @@
 #pragma once
 
 #include "window.hpp"
+#include "pipeline.hpp"
 
 class Game {
 public:
@@ -14,6 +15,6 @@ public:
 private:
 
   Window window{WIDTH, HEIGHT, "Space Wars"};
-
+  Pipeline pipeline{"../shaders/simple_shader.vert.spv", "../shaders/simple_shader.frag.spv"};
 
 };
