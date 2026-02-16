@@ -11,7 +11,7 @@
 
 
 
-SwapChain::SwapChain(MyEngineDevice &deviceRef, VkExtent2D extent)
+SwapChain::SwapChain(Device &deviceRef, VkExtent2D extent)
     : device{deviceRef}, windowExtent{extent} {
   createSwapChain();
   createImageViews();
