@@ -10,9 +10,20 @@ TARGET = $(BUILD_DIR)/space-wars
 SRCS = $(wildcard *.cpp)
 OBJS = $(SRCS:%.cpp=$(BUILD_DIR)/%.o)
 
+VERT_SRCS = $(wildcard shaders/*.vert)
+FRAG_SRCS = $(wildcard shaders/*.frag)
+SPV_FILES = $(VERT_SRCS:%.vert=%.vert.spv) $(FRAG_SRCS:%.frag=%.frag.spv)
 
 
-all: $(TARGET)
+all: shaders $(TARGET)
+
+shaders: $(SPV_FILES)
+
+shaders/%.vert.spv: shaders/%.vert
+	$(GLSLC) $< -o $@
+
+shaders/%.frag.spv: shaders/%.frag
+	$(GLSLC) $< -o $@
 
 $(TARGET): $(OBJS) | $(BUILD_DIR)
 	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
@@ -25,4 +36,3 @@ $(BUILD_DIR):
 
 clean:
 	rm -rf $(BUILD_DIR)
-

@@ -25,7 +25,8 @@ void Game::run() {
   while(!window.shouldClose()){
     glfwPollEvents();
     drawFrame();
-  }  
+  } 
+  vkDeviceWaitIdle(device.device());
 
 
 }
