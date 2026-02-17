@@ -2,11 +2,13 @@
 #include "swap_chain.hpp"
 #include "vulkan/vulkan_core.h"
 
+#include <memory>
 #include <stdexcept>
 #include <array>
 
 
 Game::Game(){
+  loadModels();
   createPipelineLayout();
   createPipeline();
   createCommandBuffers();
@@ -31,6 +33,15 @@ void Game::run() {
 
 }
 
+void Game::loadModels(){
+  std::vector<Model::Vertex> verticies{
+    {{0.0f, -0.5f}},
+    {{0.5f, 0.5f}},
+    {{-0.5f, 0.5f}}
+  };
+
+  model = std::make_unique<Model>(device, verticies);
+}
 
 void Game::createPipelineLayout(){
   VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
@@ -97,7 +108,8 @@ void Game::createCommandBuffers(){
     vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
     pipeline->bind(commandBuffers[i]);
-    vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
+    model->draw(commandBuffers[i]);
+
 
     vkCmdEndRenderPass(commandBuffers[i]);
 
