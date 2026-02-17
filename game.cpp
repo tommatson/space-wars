@@ -35,9 +35,9 @@ void Game::run() {
 
 void Game::loadModels(){
   std::vector<Model::Vertex> verticies{
-    {{0.0f, -0.5f}},
-    {{0.5f, 0.5f}},
-    {{-0.5f, 0.5f}}
+    {{0.0f, -0.5f}, {1.0, 0.0f, 0.0f}},
+    {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+    {{-0.5f, 0.5f}, {0.0f, 1.0f, 1.0f}}
   };
 
   model = std::make_unique<Model>(device, verticies);
