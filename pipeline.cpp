@@ -116,12 +116,6 @@ void Pipeline::createGraphicsPipeline(const std::string& vertFilePath, const std
   }
 
 
-
-
-
-
-
-
 }
 
 
@@ -139,6 +133,9 @@ void Pipeline::createShaderModule(const std::vector<char>& code, VkShaderModule*
 }
 
 
+void Pipeline::bind(VkCommandBuffer commandBuffer){
+  vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+}
 
 
 
