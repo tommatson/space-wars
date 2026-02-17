@@ -108,6 +108,7 @@ void Game::createCommandBuffers(){
     vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
     pipeline->bind(commandBuffers[i]);
+    model->bind(commandBuffers[i]);
     model->draw(commandBuffers[i]);
 
 
