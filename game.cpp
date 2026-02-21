@@ -5,6 +5,7 @@
 #include <memory>
 #include <stdexcept>
 #include <array>
+#include <cassert>
 
 
 Game::Game(){
@@ -61,7 +62,13 @@ void Game::createPipelineLayout(){
 
 
 void Game::createPipeline(){
-  auto pipelineConfig = Pipeline::defaultPipelineConfigInfo(swapChain->width(), swapChain->height());
+
+
+  assert(swapChain != nullptr && "Cannot create pipeline before swap chain");
+  assert(pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
+
+  PipelineConfigInfo pipelineConfig{};
+  Pipeline::defaultPipelineConfigInfo(pipelineConfig);
   pipelineConfig.renderPass = swapChain->getRenderPass();
   pipelineConfig.pipelineLayout = pipelineLayout;
   pipeline = std::make_unique<Pipeline>(device, "../shaders/simple_shader.vert.spv", "../shaders/simple_shader.frag.spv", pipelineConfig);
@@ -76,7 +83,19 @@ void Game::recreateSwapChain() {
   }
 
   vkDeviceWaitIdle(device.device());
-  swapChain = std::make_unique<SwapChain>(device, extent);
+
+  if (swapChain == nullptr){
+    swapChain = std::make_unique<SwapChain>(device, extent);
+  } else {
+    swapChain = std::make_unique<SwapChain>(device, extent, std::move(swapChain));    
+    if (swapChain->imageCount() != commandBuffers.size()){
+      freeCommandBuffers();
+      createCommandBuffers();
+    }
+  }
+  
+  // Future optimisation is check if render passes are compatable
+  // If yes, then render pipeline does not need to be created
   createPipeline();
 
 }
@@ -96,6 +115,12 @@ void Game::createCommandBuffers(){
     throw std::runtime_error("Failed to allocate command buffers!");
   }
 
+}
+
+
+void Game::freeCommandBuffers(){
+  vkFreeCommandBuffers(device.device(), device.getCommandPool(), static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
+  commandBuffers.clear();
 }
 
 
@@ -122,6 +147,18 @@ void Game::recordCommandBuffer(int imageIndex){
   renderPassInfo.pClearValues = clearValues.data();
 
   vkCmdBeginRenderPass(commandBuffers[imageIndex], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+
+  VkViewport viewport{};
+  viewport.x = 0.0f;
+  viewport.y = 0.0f;
+  viewport.width = static_cast<float>(swapChain->getSwapChainExtent().width);
+  viewport.height = static_cast<float>(swapChain->getSwapChainExtent().height);
+  viewport.minDepth = 0.0f;
+  viewport.maxDepth = 1.0f;
+  VkRect2D scissor{{0, 0}, swapChain->getSwapChainExtent()};
+  vkCmdSetViewport(commandBuffers[imageIndex], 0, 1, &viewport);
+  vkCmdSetScissor(commandBuffers[imageIndex], 0, 1, &scissor);
 
   pipeline->bind(commandBuffers[imageIndex]);
   model->bind(commandBuffers[imageIndex]);
