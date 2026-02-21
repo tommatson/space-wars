@@ -18,11 +18,22 @@ void Window::initWindow(){
   glfwInit();
   // Disable API creation as using Vulkan
   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+  glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
   window = glfwCreateWindow(width, height, windowName.c_str(), nullptr, nullptr);
+  glfwSetWindowUserPointer(window, this);
+  glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
 
 
+} 
+
+
+bool Window::wasWindowResized(){
+  return framebufferResized;
+}
+
+void Window::resetWindowResizedFlag(){
+  framebufferResized = false;
 }
 
 bool Window::shouldClose(){
@@ -38,4 +49,13 @@ void Window::createWindowSurface(VkInstance instance, VkSurfaceKHR *surface){
   if (glfwCreateWindowSurface(instance, window, nullptr, surface) != VK_SUCCESS){
     throw std::runtime_error("Failed to create window surface.");
   }
+}
+
+
+void Window::framebufferResizeCallback(GLFWwindow *windowParam, int width, int height){
+  auto window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(windowParam));
+
+  window->framebufferResized = true;
+  window->width = width;
+  window->height = height;
 }
