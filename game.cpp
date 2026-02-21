@@ -13,6 +13,7 @@
 
 
 struct SimplePushConstantData {
+  glm::mat2 transform{1.0f};
   glm::vec2 offset;
   alignas(16) glm::vec3 color;
 
@@ -20,7 +21,7 @@ struct SimplePushConstantData {
 
 
 Game::Game(){
-  loadModels();
+  loadGameObjects();
   createPipelineLayout();
   recreateSwapChain();
   createCommandBuffers();
@@ -45,14 +46,22 @@ void Game::run() {
 
 }
 
-void Game::loadModels(){
+void Game::loadGameObjects(){
   std::vector<Model::Vertex> verticies{
     {{0.0f, -0.5f}, {1.0, 0.0f, 0.0f}},
     {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
     {{-0.5f, 0.5f}, {0.0f, 1.0f, 1.0f}}
   };
 
-  model = std::make_unique<Model>(device, verticies);
+  auto model = std::make_shared<Model>(device, verticies);
+
+  auto triangle = GameObject::createGameObject();
+
+  triangle.model = model;
+  triangle.color = {0.1f, 0.8f, 0.1f};
+  triangle.transform2d.translation.x = 0.2f;
+
+  gameObjects.push_back(std::move(triangle));
 }
 
 void Game::createPipelineLayout(){
@@ -180,26 +189,28 @@ void Game::recordCommandBuffer(int imageIndex){
   vkCmdSetViewport(commandBuffers[imageIndex], 0, 1, &viewport);
   vkCmdSetScissor(commandBuffers[imageIndex], 0, 1, &scissor);
 
-  pipeline->bind(commandBuffers[imageIndex]);
-  model->bind(commandBuffers[imageIndex]);
-
-  for(int j = 0; j < 4; j++){
-    SimplePushConstantData push{};
-    push.offset = {0.0f, -0.4f + j * 0.25f};
-    push.color = {0.0f, 0.0f, 0.2f + 0.2f * j};
-
-    vkCmdPushConstants(commandBuffers[imageIndex], pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(SimplePushConstantData), &push);
-    model->draw(commandBuffers[imageIndex]);
-    
-  }
-
-
-
+  renderGameObjects(commandBuffers[imageIndex]);
 
   vkCmdEndRenderPass(commandBuffers[imageIndex]);
 
   if(vkEndCommandBuffer(commandBuffers[imageIndex]) != VK_SUCCESS){
     throw std::runtime_error("Failed to record command buffer");
+  }
+}
+
+void Game::renderGameObjects(VkCommandBuffer commandBuffer){
+  pipeline->bind(commandBuffer);
+
+  for (auto& obj : gameObjects){
+    SimplePushConstantData push{};
+    push.offset = obj.transform2d.translation;
+    push.color = obj.color;
+    push.transform = obj.transform2d.mat2();
+
+    vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(SimplePushConstantData), &push);
+
+    obj.model->bind(commandBuffer);
+    obj.model->draw(commandBuffer);
   }
 }
 
