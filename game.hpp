@@ -2,7 +2,6 @@
 
 #include "vulkan/vulkan_core.h"
 #include "window.hpp"
-#include "pipeline.hpp"
 #include "device.hpp"
 #include "game_object.hpp"
 #include "renderer.hpp"
@@ -29,16 +28,11 @@ public:
 
 private:
   void loadGameObjects();
-  void createPipelineLayout();
-  void createPipeline();
-  void renderGameObjects(VkCommandBuffer commandBuffer);
 
   Window window{WIDTH, HEIGHT, "Space Wars"};
   Device device{window};  
 
   Renderer renderer{window, device};
-  std::unique_ptr<Pipeline> pipeline;
-  VkPipelineLayout pipelineLayout;
  
   std::vector<GameObject> gameObjects;
 };
