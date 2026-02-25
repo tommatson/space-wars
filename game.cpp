@@ -30,11 +30,14 @@ void Game::run() {
   RenderSystem renderSystem{device, renderer.getSwapChainRenderPass()};
 
   Camera camera{};
-  camera.setOrthographicProjection(-1, 1, -1, 1, -1, 1);
 
 
   while(!window.shouldClose()){
     glfwPollEvents();
+
+    float aspect = renderer.getAspectRatio();
+    camera.setOrthographicProjection(-aspect, aspect, -1, 1, -1, 1);
+
 
     if(auto commandBuffer = renderer.beginFrame()){
       renderer.beginSwapChainRenderPass(commandBuffer);
