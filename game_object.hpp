@@ -3,27 +3,29 @@
 
 #include "model.hpp"
 
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <memory>
 
 
-struct Transform2dComponent {
-  glm::vec2 translation{};
-  glm::vec2 scale{1.0f, 1.0f};
-  float rotation;
+struct TransformComponent {
+  glm::vec3 translation{};
+  glm::vec3 scale{1.0f, 1.0f, 1.0f};
+  glm::vec3 rotation{};
 
 
-  glm::mat2 mat2() {
-    const float s = glm::sin(rotation);
-    const float c = glm::cos(rotation);
-    glm::mat2 rotMatrix{{c, s}, {-s, c}};
+
+  glm::mat4 mat4 (){
+    auto transform = glm::translate(glm::mat4{1.0f}, translation);
 
 
-    glm::mat2 scaleMat{{scale.x, 0.0f}, {0.0f, scale.y}};
-    return rotMatrix * scaleMat; 
+    transform = glm::rotate(transform, rotation.y, {0.0f, 1.0f, 0.0f});
+    transform = glm::rotate(transform, rotation.x, {1.0f, 0.0f, 0.0f});
+    transform = glm::rotate(transform, rotation.z, {0.0f, 1.0f, 1.0f});
 
-  };
-
+    transform = glm::scale(transform, scale);
+    return transform;
+  }
 };
 
 class GameObject{
@@ -51,7 +53,7 @@ public:
   std::shared_ptr<Model> model{};
   glm::vec3 color{};
 
-  Transform2dComponent transform2d{};
+  TransformComponent transform{};
 
 private:
 
