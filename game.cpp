@@ -36,8 +36,8 @@ void Game::run() {
     glfwPollEvents();
 
     float aspect = renderer.getAspectRatio();
-    camera.setOrthographicProjection(-aspect, aspect, -1, 1, -1, 1);
-
+    // camera.setOrthographicProjection(-aspect, aspect, -1, 1, -1, 1);
+    camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 10.0f);
 
     if(auto commandBuffer = renderer.beginFrame()){
       renderer.beginSwapChainRenderPass(commandBuffer);
@@ -118,7 +118,7 @@ void Game::loadGameObjects(){
 
   auto cube = GameObject::createGameObject();
   cube.model = model;
-  cube.transform.translation = {0.0f, 0.0f, 0.5f};
+  cube.transform.translation = {0.0f, 0.0f, 2.5f};
   cube.transform.scale = {0.5f, 0.5f, 0.5f};
   gameObjects.push_back(std::move(cube));
 }
