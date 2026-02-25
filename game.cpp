@@ -1,5 +1,6 @@
 #include "game.hpp"
 
+#include "camera.hpp"
 #include "render_system.hpp"
 
 #define GLM_FORCE_RADIANS
@@ -28,12 +29,16 @@ Game::~Game(){
 void Game::run() {
   RenderSystem renderSystem{device, renderer.getSwapChainRenderPass()};
 
+  Camera camera{};
+  camera.setOrthographicProjection(-1, 1, -1, 1, -1, 1);
+
+
   while(!window.shouldClose()){
     glfwPollEvents();
 
     if(auto commandBuffer = renderer.beginFrame()){
       renderer.beginSwapChainRenderPass(commandBuffer);
-      renderSystem.renderGameObjects(commandBuffer, gameObjects);
+      renderSystem.renderGameObjects(commandBuffer, gameObjects, camera);
       renderer.endSwapChainRenderPass(commandBuffer);
       renderer.endFrame();
     }
