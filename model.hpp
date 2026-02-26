@@ -6,14 +6,17 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 
+#include <memory>
 #include <vector>
 
 class Model{
 public:
 
   struct Vertex{
-    glm::vec3 position;
-    glm::vec3 color;
+    glm::vec3 position{};
+    glm::vec3 color{};
+    glm::vec3 normal{};
+    glm::vec2 uv{};
 
     static std::vector<VkVertexInputBindingDescription> getBindingDescriptions();
     static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions();
@@ -23,6 +26,8 @@ public:
   struct Builder{
     std::vector<Vertex> vertices{};
     std::vector<uint32_t> indices{};
+
+    void loadModel(const std::string& filepath);
   };
 
   Model(Device &device, const Model::Builder& builder);
@@ -30,6 +35,9 @@ public:
 
   Model(const Model &) = delete;
   Model &operator=(const Model &) = delete;
+
+
+  static std::unique_ptr<Model> createModelFromFile(Device& device, const std::string& filepath);
 
   void bind(VkCommandBuffer commandBuffer);
 
