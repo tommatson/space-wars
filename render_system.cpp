@@ -15,7 +15,7 @@
 
 struct SimplePushConstantData {
   glm::mat4 transform{1.0f};
-  alignas(16) glm::vec3 color;
+  glm::mat4 modelMatrix{1.0f};
 };
 
 
@@ -80,8 +80,9 @@ void RenderSystem::renderGameObjects(VkCommandBuffer commandBuffer, std::vector<
   for (auto& obj : gameObjects){
 
     SimplePushConstantData push{};
-    push.color = obj.color;
-    push.transform = projectionView * obj.transform.mat4();
+    auto modelMatrix = obj.transform.mat4();
+    push.transform = projectionView * modelMatrix;
+    push.modelMatrix = modelMatrix;
 
     vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(SimplePushConstantData), &push);
 
