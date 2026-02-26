@@ -1,4 +1,4 @@
-#include "game.hpp"
+#include "engine/game.hpp"
 
 #include <cstdlib>
 #include <exception>
