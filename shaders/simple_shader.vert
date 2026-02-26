@@ -36,7 +36,9 @@ void main(){
 
   vec3 directionToLight = ubo.lightPosition - positionWorld.xyz;
 
-  vec3 lightColor = ubo.lightColor.xyz * ubo.lightColor.w;
+  float attenuation = 1.0 / dot(directionToLight, directionToLight);
+
+  vec3 lightColor = ubo.lightColor.xyz * ubo.lightColor.w * attenuation;
   vec3 ambientLight = ubo.ambientLightColor.xyz * ubo.ambientLightColor.w;
   vec3 diffuseLight = lightColor * max(dot(normalWorldSpace, normalize(directionToLight)), 0); 
 

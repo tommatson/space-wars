@@ -72,6 +72,7 @@ void Game::run() {
   camera.setViewTarget(glm::vec3(-1.0f, -2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 2.5f));
 
   auto viewerObject = GameObject::createGameObject();
+  viewerObject.transform.translation.z = -2.5f;
 
   KeyboardMovementController cameraController{};
 
@@ -93,7 +94,7 @@ void Game::run() {
 
 
     float aspect = renderer.getAspectRatio();
-    camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 10.0f);
+    camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
 
     if(auto commandBuffer = renderer.beginFrame()){
       int frameIndex = renderer.getFrameIndex();
@@ -126,12 +127,24 @@ void Game::run() {
 
 void Game::loadGameObjects(){
 
-  std::shared_ptr<Model> model = Model::createModelFromFile(device, "../models/flat_vase.obj"); 
+  std::shared_ptr<Model> model;
+
+  model = Model::createModelFromFile(device, "../models/flat_vase.obj"); 
   auto gameObj = GameObject::createGameObject();
   gameObj.model = model;
-  gameObj.transform.translation = {0.0f, 0.5f, 2.5f};
+  gameObj.transform.translation = {0.0f, 0.5f, 0.0f};
   gameObj.transform.scale = glm::vec3(3.0f); 
   gameObjects.push_back(std::move(gameObj));
+
+  model = Model::createModelFromFile(device, "../models/quad.obj"); 
+  auto floor = GameObject::createGameObject();
+  floor.model = model;
+  floor.transform.translation = {0.0f, 0.5f, 0.0f};
+  floor.transform.scale = {3.0f, 1.0f, 3.0f}; 
+  gameObjects.push_back(std::move(floor));
+
+  
+
 }
 
 
