@@ -6,3 +6,11 @@ When updating dependencies:
 make clean && bear -- make
 ```
 
+In blender:
+
+- Shade smooth on or off
+
+When exporting in blender:
+- Forward as "Z Forward"
+- Up as "-Y Up"
+- Turn on "Triangulate Faces"

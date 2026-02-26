@@ -78,10 +78,10 @@ void Game::run() {
 
 void Game::loadGameObjects(){
 
-  std::shared_ptr<Model> model = Model::createModelFromFile(device, "../models/smooth_vase.obj"); 
+  std::shared_ptr<Model> model = Model::createModelFromFile(device, "../models/flat_vase.obj"); 
   auto gameObj = GameObject::createGameObject();
   gameObj.model = model;
-  gameObj.transform.translation = {0.0f, 0.0f, 2.5f};
+  gameObj.transform.translation = {0.0f, 0.5f, 2.5f};
   gameObj.transform.scale = glm::vec3(3.0f); 
   gameObjects.push_back(std::move(gameObj));
 }
