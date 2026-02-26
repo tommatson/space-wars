@@ -3,6 +3,7 @@
 #include "camera.hpp"
 #include "keyboard_movement_controller.hpp"
 #include "render_system.hpp"
+#include "buffer.hpp"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -16,6 +17,10 @@
 #include <array>
 #include <cassert>
 
+struct GlobalUbo {
+  glm::mat4 projectionView{1.0f};
+  glm::vec3 lightDirection = glm::normalize(glm::vec3{1.0f, -3.0f, -1.0f});
+};
 
 Game::Game(){
   loadGameObjects();
@@ -29,6 +34,18 @@ Game::~Game(){
 
 
 void Game::run() {
+  Buffer globalUboBuffer{
+    device, 
+    sizeof(GlobalUbo), 
+    SwapChain::MAX_FRAMES_IN_FLIGHT,
+    VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+    device.properties.limits.minUniformBufferOffsetAlignment
+  };
+  globalUboBuffer.map();
+
+
+
   RenderSystem renderSystem{device, renderer.getSwapChainRenderPass()};
 
   Camera camera{};
@@ -63,8 +80,23 @@ void Game::run() {
     camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 10.0f);
 
     if(auto commandBuffer = renderer.beginFrame()){
+      int frameIndex = renderer.getFrameIndex();
+      FrameInfo frameInfo{
+        frameIndex,
+        frameTime,
+        commandBuffer,
+        camera
+      };
+
+      // update
+      GlobalUbo ubo{};
+      ubo.projectionView = camera.getProjection() * camera.getView();
+      globalUboBuffer.writeToIndex(&ubo, frameIndex);
+      globalUboBuffer.flushIndex(frameIndex);
+
+      // render 
       renderer.beginSwapChainRenderPass(commandBuffer);
-      renderSystem.renderGameObjects(commandBuffer, gameObjects, camera);
+      renderSystem.renderGameObjects(frameInfo, gameObjects);
       renderer.endSwapChainRenderPass(commandBuffer);
       renderer.endFrame();
     }

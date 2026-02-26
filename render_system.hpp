@@ -6,6 +6,7 @@
 #include "pipeline.hpp"
 #include "device.hpp"
 #include "game_object.hpp"
+#include "frame_info.hpp"
 
 #include <memory>
 #include <vector>
@@ -21,7 +22,7 @@ public:
   RenderSystem &operator=(const RenderSystem &) = delete;
 
 
-  void renderGameObjects(VkCommandBuffer commandBuffer, std::vector<GameObject>& gameObjects, const Camera& camera);
+  void renderGameObjects(FrameInfo& frameInfo, std::vector<GameObject>& gameObjects);
 
 
 

@@ -72,10 +72,10 @@ void RenderSystem::createPipeline(VkRenderPass renderPass){
 
 
 
-void RenderSystem::renderGameObjects(VkCommandBuffer commandBuffer, std::vector<GameObject>& gameObjects, const Camera& camera){
-  pipeline->bind(commandBuffer);
+void RenderSystem::renderGameObjects(FrameInfo& frameInfo, std::vector<GameObject>& gameObjects){
+  pipeline->bind(frameInfo.commandBuffer);
 
-  auto projectionView = camera.getProjection() * camera.getView();
+  auto projectionView = frameInfo.camera.getProjection() * frameInfo.camera.getView();
 
   for (auto& obj : gameObjects){
 
@@ -84,10 +84,10 @@ void RenderSystem::renderGameObjects(VkCommandBuffer commandBuffer, std::vector<
     push.transform = projectionView * modelMatrix;
     push.normalMatrix = obj.transform.normalMatrix();
 
-    vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(SimplePushConstantData), &push);
+    vkCmdPushConstants(frameInfo.commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(SimplePushConstantData), &push);
 
-    obj.model->bind(commandBuffer);
-    obj.model->draw(commandBuffer);
+    obj.model->bind(frameInfo.commandBuffer);
+    obj.model->draw(frameInfo.commandBuffer);
   }
 }
 
