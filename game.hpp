@@ -1,6 +1,8 @@
 #pragma once
 
 #include "vulkan/vulkan_core.h"
+
+#include "descriptors.hpp"
 #include "window.hpp"
 #include "device.hpp"
 #include "game_object.hpp"
@@ -34,5 +36,6 @@ private:
 
   Renderer renderer{window, device};
  
+  std::unique_ptr<DescriptorPool> globalPool{};
   std::vector<GameObject> gameObjects;
 };

@@ -15,7 +15,7 @@ class RenderSystem {
 public:
 
 
-  RenderSystem(Device& device, VkRenderPass renderPass);
+  RenderSystem(Device& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
   ~RenderSystem();
 
   RenderSystem(const RenderSystem &) = delete;
@@ -27,7 +27,7 @@ public:
 
 
 private:
-  void createPipelineLayout();
+  void createPipelineLayout(VkDescriptorSetLayout globalSetLayout);
   void createPipeline(VkRenderPass renderPass);
 
   Device& device;  
