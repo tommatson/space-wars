@@ -103,7 +103,8 @@ void Game::run() {
         frameTime,
         commandBuffer,
         camera,
-        globalDescriptorSets[frameIndex]
+        globalDescriptorSets[frameIndex],
+        gameObjects
       };
 
       // update
@@ -113,7 +114,7 @@ void Game::run() {
       uboBuffers[frameIndex]->flush();
       // render 
       renderer.beginSwapChainRenderPass(commandBuffer);
-      renderSystem.renderGameObjects(frameInfo, gameObjects);
+      renderSystem.renderGameObjects(frameInfo);
       renderer.endSwapChainRenderPass(commandBuffer);
       renderer.endFrame();
     }
@@ -134,14 +135,14 @@ void Game::loadGameObjects(){
   gameObj.model = model;
   gameObj.transform.translation = {0.0f, 0.5f, 0.0f};
   gameObj.transform.scale = glm::vec3(3.0f); 
-  gameObjects.push_back(std::move(gameObj));
+  gameObjects.emplace(gameObj.getId(), std::move(gameObj));
 
   model = Model::createModelFromFile(device, "../models/quad.obj"); 
   auto floor = GameObject::createGameObject();
   floor.model = model;
   floor.transform.translation = {0.0f, 0.5f, 0.0f};
   floor.transform.scale = {3.0f, 1.0f, 3.0f}; 
-  gameObjects.push_back(std::move(floor));
+  gameObjects.emplace(floor.getId(), std::move(floor)); 
 
   
 

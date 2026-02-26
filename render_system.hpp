@@ -22,7 +22,7 @@ public:
   RenderSystem &operator=(const RenderSystem &) = delete;
 
 
-  void renderGameObjects(FrameInfo& frameInfo, std::vector<GameObject>& gameObjects);
+  void renderGameObjects(FrameInfo& frameInfo);
 
 
 
