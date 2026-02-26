@@ -5,16 +5,20 @@ CXXFLAGS = -std=c++17 -I. -I$(VULKAN_SDK_PATH)/include -I$(STB_INCLUDE_PATH) -I$
 LDFLAGS = -L$(VULKAN_SDK_PATH)/lib -Wl,-rpath,$(VULKAN_SDK_PATH)/lib `pkg-config --static --libs glfw3` -lvulkan
 
 ENGINE_DIR = engine
+SYSTEMS_DIR = $(ENGINE_DIR)/systems
 BUILD_DIR = build
 ENGINE_BUILD_DIR = $(BUILD_DIR)/engine
+SYSTEMS_BUILD_DIR = $(BUILD_DIR)/engine/systems
 TARGET = $(BUILD_DIR)/space-wars
 
 GAME_SRCS = $(wildcard *.cpp)
 ENGINE_SRCS = $(wildcard $(ENGINE_DIR)/*.cpp)
+SYSTEMS_SRCS = $(wildcard $(SYSTEMS_DIR)/*.cpp)
 
 GAME_OBJS = $(GAME_SRCS:%.cpp=$(BUILD_DIR)/%.o)
 ENGINE_OBJS = $(ENGINE_SRCS:$(ENGINE_DIR)/%.cpp=$(ENGINE_BUILD_DIR)/%.o)
-OBJS = $(GAME_OBJS) $(ENGINE_OBJS)
+SYSTEMS_OBJS = $(SYSTEMS_SRCS:$(SYSTEMS_DIR)/%.cpp=$(SYSTEMS_BUILD_DIR)/%.o)
+OBJS = $(GAME_OBJS) $(ENGINE_OBJS) $(SYSTEMS_OBJS)
 
 VERT_SRCS = $(wildcard shaders/*.vert)
 FRAG_SRCS = $(wildcard shaders/*.frag)
@@ -40,8 +44,11 @@ $(BUILD_DIR)/%.o: %.cpp | dirs
 $(ENGINE_BUILD_DIR)/%.o: $(ENGINE_DIR)/%.cpp | dirs
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
+$(SYSTEMS_BUILD_DIR)/%.o: $(SYSTEMS_DIR)/%.cpp | dirs
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
 dirs:
-	mkdir -p $(BUILD_DIR) $(ENGINE_BUILD_DIR)
+	mkdir -p $(BUILD_DIR) $(ENGINE_BUILD_DIR) $(SYSTEMS_BUILD_DIR)
 
 clean:
 	rm -rf $(BUILD_DIR)

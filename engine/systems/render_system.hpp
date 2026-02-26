@@ -2,11 +2,11 @@
 
 #include "vulkan/vulkan_core.h"
 
-#include "camera.hpp"
-#include "pipeline.hpp"
-#include "device.hpp"
-#include "game_object.hpp"
-#include "frame_info.hpp"
+#include "../camera.hpp"
+#include "../pipeline.hpp"
+#include "../device.hpp"
+#include "../game_object.hpp"
+#include "../frame_info.hpp"
 
 #include <memory>
 #include <vector>
