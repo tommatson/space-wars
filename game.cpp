@@ -78,12 +78,12 @@ void Game::run() {
 
 void Game::loadGameObjects(){
 
-  std::shared_ptr<Model> model = Model::createModelFromFile(device, "../models/colored_cube.obj"); 
-  auto cube = GameObject::createGameObject();
-  cube.model = model;
-  cube.transform.translation = {0.0f, 0.0f, 2.5f};
-  cube.transform.scale = {0.5f, 0.5f, 0.5f};
-  gameObjects.push_back(std::move(cube));
+  std::shared_ptr<Model> model = Model::createModelFromFile(device, "../models/smooth_vase.obj"); 
+  auto gameObj = GameObject::createGameObject();
+  gameObj.model = model;
+  gameObj.transform.translation = {0.0f, 0.0f, 2.5f};
+  gameObj.transform.scale = glm::vec3(3.0f); 
+  gameObjects.push_back(std::move(gameObj));
 }
 
 
