@@ -10,15 +10,7 @@ bool NetworkManager::initializeSocket(uint16_t port, NetworkRole newRole){
 
   // Error in socket opening
   if (!socket.openSocket(port)) return false;
-
-  std::optional<Endpoint> address = socket.getSocketAddress();
-
-  if (!address) {
-    socket.closeSocket();
-    return false;
-  } 
     
-  socketAddress = *address;
   role = newRole;
   
   return true;
@@ -32,6 +24,21 @@ bool NetworkManager::initializeServer(){
 
 bool NetworkManager::initializeClient(){
   return initializeSocket(0, NetworkRole::Client);
+}
+
+
+std::optional<Endpoint> NetworkManager::getSocketAddress(){
+
+  std::optional<Endpoint> address = socket.getSocketAddress();
+
+  if (!address) {
+    socket.closeSocket();
+    role = NetworkRole::Uninitialized;
+    return std::nullopt;
+  }
+
+  return address;
+
 }
 
 

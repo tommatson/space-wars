@@ -21,6 +21,8 @@ public:
   bool initializeServer();
   bool initializeClient();
 
+  std::optional<Endpoint> getSocketAddress();
+
   bool sendMailbox();
 
 
@@ -35,7 +37,6 @@ private:
   NetworkRole role = NetworkRole::Uninitialized;
 
   Socket socket;
-  Endpoint socketAddress;
 
   bool initializeSocket(uint16_t port, NetworkRole newRole);
 
