@@ -1,13 +1,21 @@
 #pragma once
 
 #include "scene.hpp"
-#include <unordered_map>
+#include <unordered_set>
 #include <memory>
 
 namespace Engine::Scene{
 
 class SceneManager {
 public:
+  
+  struct CurrentScene {
+    std::string sceneName;
+    std::unique_ptr<Scene> scenePtr;
+  };
+
+
+
   SceneManager();
   ~SceneManager();
 
@@ -17,9 +25,8 @@ public:
   SceneManager(SceneManager&&) = delete;
   SceneManager& operator=(SceneManager&&) = delete;
 
-  bool registerScene(std::string sceneName, std::unique_ptr<Scene> scenePtr);
+  bool registerScene(std::string sceneName);
 
-  std::string getCurrentScene();
 
   bool switchCurrentScene(std::string newSceneName);
 
@@ -27,14 +34,13 @@ public:
   
 
 private:
-  std::unordered_map<std::string, std::unique_ptr<Scene>> sceneRegistry;
-
-  std::string currentScene;
+  
 
 
+  CurrentScene currentScene;
 
 
-
+  std::unordered_set<std::string> sceneRegistry;
 
 };
 

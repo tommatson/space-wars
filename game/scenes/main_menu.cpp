@@ -4,7 +4,7 @@
 
 namespace Game::Scenes {
 
-class Gameplay final : public Engine::Scene::Scene {
+class MainMenu final : public Engine::Scene::Scene {
 public:
   virtual std::unique_ptr<Scene> load() override {
 
