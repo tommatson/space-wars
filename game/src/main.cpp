@@ -12,7 +12,15 @@ int main(){
 
   
   if(networkManager.initializeClient()){
-    std::cout << "Started socket at: " << 
+    std::optional<Engine::Network::Endpoint> socketAddress = networkManager.getSocketAddress();
+    if (socketAddress){
+      Engine::Network::Endpoint address = *socketAddress;
+      std::cout << "Socket opened on port " << address.port << '\n';
+    } else {
+      std::cout << "Failed to get socket address" << '\n';
+    }
+  } else{
+    std::cout << "Failed to initialize client" << '\n';
   }
   
   

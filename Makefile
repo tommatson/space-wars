@@ -7,21 +7,29 @@ LDFLAGS = -L$(VULKAN_SDK_PATH)/lib -Wl,-rpath,$(VULKAN_SDK_PATH)/lib `pkg-config
 ENGINE_DIR = engine
 RENDERER_DIR = $(ENGINE_DIR)/renderer
 SYSTEMS_DIR = $(RENDERER_DIR)/systems
+NETWORK_DIR = $(ENGINE_DIR)/network
+SOCKETS_DIR = $(NETWORK_DIR)/sockets
 GAME_DIR = game/src
 BUILD_DIR = build
 RENDERER_BUILD_DIR = $(BUILD_DIR)/engine/renderer
 SYSTEMS_BUILD_DIR = $(BUILD_DIR)/engine/renderer/systems
+NETWORK_BUILD_DIR = $(BUILD_DIR)/engine/network
+SOCKETS_BUILD_DIR = $(BUILD_DIR)/engine/network/sockets
 GAME_BUILD_DIR = $(BUILD_DIR)/game/src
 TARGET = $(BUILD_DIR)/space-wars
 
 GAME_SRCS = $(wildcard $(GAME_DIR)/*.cpp)
 RENDERER_SRCS = $(wildcard $(RENDERER_DIR)/*.cpp)
 SYSTEMS_SRCS = $(wildcard $(SYSTEMS_DIR)/*.cpp)
+NETWORK_SRCS = $(wildcard $(NETWORK_DIR)/*.cpp)
+SOCKETS_SRCS = $(wildcard $(SOCKETS_DIR)/*.cpp)
 
 GAME_OBJS = $(GAME_SRCS:$(GAME_DIR)/%.cpp=$(GAME_BUILD_DIR)/%.o)
 RENDERER_OBJS = $(RENDERER_SRCS:$(RENDERER_DIR)/%.cpp=$(RENDERER_BUILD_DIR)/%.o)
 SYSTEMS_OBJS = $(SYSTEMS_SRCS:$(SYSTEMS_DIR)/%.cpp=$(SYSTEMS_BUILD_DIR)/%.o)
-OBJS = $(GAME_OBJS) $(RENDERER_OBJS) $(SYSTEMS_OBJS)
+NETWORK_OBJS = $(NETWORK_SRCS:$(NETWORK_DIR)/%.cpp=$(NETWORK_BUILD_DIR)/%.o)
+SOCKETS_OBJS = $(SOCKETS_SRCS:$(SOCKETS_DIR)/%.cpp=$(SOCKETS_BUILD_DIR)/%.o)
+OBJS = $(GAME_OBJS) $(RENDERER_OBJS) $(SYSTEMS_OBJS) $(NETWORK_OBJS) $(SOCKETS_OBJS)
 
 VERT_SRCS = $(wildcard shaders/*.vert)
 FRAG_SRCS = $(wildcard shaders/*.frag)
@@ -50,8 +58,14 @@ $(RENDERER_BUILD_DIR)/%.o: $(RENDERER_DIR)/%.cpp | dirs
 $(SYSTEMS_BUILD_DIR)/%.o: $(SYSTEMS_DIR)/%.cpp | dirs
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
+$(NETWORK_BUILD_DIR)/%.o: $(NETWORK_DIR)/%.cpp | dirs
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(SOCKETS_BUILD_DIR)/%.o: $(SOCKETS_DIR)/%.cpp | dirs
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
 dirs:
-	mkdir -p $(BUILD_DIR) $(RENDERER_BUILD_DIR) $(SYSTEMS_BUILD_DIR) $(GAME_BUILD_DIR)
+	mkdir -p $(BUILD_DIR) $(RENDERER_BUILD_DIR) $(SYSTEMS_BUILD_DIR) $(NETWORK_BUILD_DIR) $(SOCKETS_BUILD_DIR) $(GAME_BUILD_DIR)
 
 clean:
 	rm -rf $(BUILD_DIR)

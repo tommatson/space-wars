@@ -3,6 +3,9 @@
 
 namespace Engine::Network {
 
+NetworkManager::NetworkManager() {}
+NetworkManager::~NetworkManager() {}
+
 bool NetworkManager::initializeSocket(uint16_t port, NetworkRole newRole){
 
   if (role != NetworkRole::Uninitialized) return false;  
