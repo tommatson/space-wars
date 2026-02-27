@@ -1,7 +1,10 @@
 #pragma once
 
 #include "scene.hpp"
-#include <unordered_set>
+
+#include "../renderer/game_object.hpp"
+
+
 #include <memory>
 
 namespace Engine::Scene{
@@ -9,7 +12,7 @@ namespace Engine::Scene{
 class SceneManager {
 public:
 
-  SceneManager();
+  SceneManager(std::unique_ptr<Scene> newScene);
   ~SceneManager();
 
   SceneManager(const SceneManager&) = delete;
@@ -19,10 +22,12 @@ public:
   SceneManager& operator=(SceneManager&&) = delete;
 
 
-  void switchCurrentScene(std::unique_ptr<Scene> newScene);
+  void loadScene(Renderer::Device& device);
+  void switchCurrentScene(std::unique_ptr<Scene> newScene, Renderer::Device& device);
+
+  Renderer::GameObject::Map& getCurrentSceneGameObjects();
 
 
-  
 
 private:
 

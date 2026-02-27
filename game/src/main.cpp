@@ -1,13 +1,20 @@
 #include "../../engine/core/application.hpp"
 #include "../../engine/network/network_manager.hpp"
 
+#include "../../engine/scene/scene.hpp"
+#include "../scenes/gameplay.hpp"
+
+
+
 #include <cstdlib>
 #include <exception>
 #include <iostream>
+#include <memory>
 #include <stdexcept>
 
 int main(){
-  Engine::Core::Application app;
+
+  Engine::Core::Application app(std::make_unique<Game::Scenes::Gameplay>());
   Engine::Network::NetworkManager networkManager;
 
   

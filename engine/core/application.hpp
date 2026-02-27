@@ -7,6 +7,9 @@
 #include "../renderer/descriptors.hpp"
 #include "../renderer/game_object.hpp"
 
+#include "../scene/scene_manager.hpp"
+#include "../scene/scene.hpp"
+
 #include <memory>
 #include <vector>
 
@@ -18,7 +21,7 @@ public:
   static constexpr int HEIGHT = 600;
 
 
-  Application();
+  Application(std::unique_ptr<Scene::Scene> initialScene);
   ~Application();
 
   Application(const Application &) = delete;
@@ -38,7 +41,8 @@ private:
   Renderer::Renderer renderer{window, device};
  
   std::unique_ptr<Renderer::DescriptorPool> globalPool{};
-  Renderer::GameObject::Map gameObjects;
+
+  Scene::SceneManager sceneManager;
 };
 
 } // namespace Engine::Core

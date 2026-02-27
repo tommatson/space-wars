@@ -6,6 +6,8 @@
 #include "../renderer/systems/point_light_system.hpp"
 #include "../renderer/buffer.hpp"
 
+
+
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
@@ -20,13 +22,13 @@
 
 namespace Engine::Core{
 
-Application::Application(){
+Application::Application(std::unique_ptr<Scene::Scene> initialScene) : sceneManager(std::move(initialScene)){
   globalPool = Renderer::DescriptorPool::Builder(device)
     .setMaxSets(Renderer::SwapChain::MAX_FRAMES_IN_FLIGHT)
     .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, Renderer::SwapChain::MAX_FRAMES_IN_FLIGHT)
     .build();
+
   loadGameObjects();
- 
 }
 
 Application::~Application(){
@@ -102,7 +104,7 @@ void Application::run() {
         commandBuffer,
         camera,
         globalDescriptorSets[frameIndex],
-        gameObjects
+        sceneManager.getCurrentSceneGameObjects()
       };
 
       // update
@@ -126,52 +128,10 @@ void Application::run() {
 }
 
 
-
 void Application::loadGameObjects(){
-
-  std::shared_ptr<Renderer::Model> model;
-
-  model = Renderer::Model::createModelFromFile(device, "../models/flat_vase.obj"); 
-  auto gameObj = Renderer::GameObject::createGameObject();
-  gameObj.model = model;
-  gameObj.transform.translation = {0.0f, 0.5f, 0.0f};
-  gameObj.transform.scale = glm::vec3(3.0f); 
-  gameObjects.emplace(gameObj.getId(), std::move(gameObj));
-
-  model = Renderer::Model::createModelFromFile(device, "../models/quad.obj"); 
-  auto floor = Renderer::GameObject::createGameObject();
-  floor.model = model;
-  floor.transform.translation = {0.0f, 0.5f, 0.0f};
-  floor.transform.scale = {3.0f, 1.0f, 3.0f}; 
-  gameObjects.emplace(floor.getId(), std::move(floor)); 
-
-
-
-
-   std::vector<glm::vec3> lightColors{
-    {1.f, .1f, .1f},
-    {.1f, .1f, 1.f},
-    {.1f, 1.f, .1f},
-    {1.f, 1.f, .1f},
-    {.1f, 1.f, 1.f},
-    {1.f, 1.f, 1.f}  //
-  };
-
-  for (int i = 0; i < lightColors.size(); i++){
-
-    auto pointLight = Renderer::GameObject::makePointLight(0.2f);
-    pointLight.color = lightColors[i];
-    auto rotateLight = glm::rotate(glm::mat4(1.0f), 
-                                   (i * glm::two_pi<float>()) / lightColors.size(),
-                                   {0.0f, -1.0f, 0.0f}
-                                   );
-    pointLight.transform.translation = glm::vec3(rotateLight * glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f));
-    gameObjects.emplace(pointLight.getId(), std::move(pointLight));
-
-  }
-
-  
-
+  sceneManager.loadScene(device);
 }
+
+
 
 } // namespace Engine::Core
