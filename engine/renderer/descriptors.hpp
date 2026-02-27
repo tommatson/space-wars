@@ -76,6 +76,8 @@ class DescriptorPool {
   void freeDescriptors(std::vector<VkDescriptorSet> &descriptors) const;
  
   void resetPool();
+
+  VkDescriptorPool getPool() const { return descriptorPool; }
  
  private:
   Device &device;
