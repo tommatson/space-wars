@@ -10,7 +10,7 @@ public:
   
   virtual ~Scene() = default;
 
-  virtual std::unique_ptr<Scene> load();
+  virtual void load();
 
 };
 

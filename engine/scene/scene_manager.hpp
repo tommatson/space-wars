@@ -8,13 +8,6 @@ namespace Engine::Scene{
 
 class SceneManager {
 public:
-  
-  struct CurrentScene {
-    std::string sceneName;
-    std::unique_ptr<Scene> scenePtr;
-  };
-
-
 
   SceneManager();
   ~SceneManager();
@@ -25,22 +18,15 @@ public:
   SceneManager(SceneManager&&) = delete;
   SceneManager& operator=(SceneManager&&) = delete;
 
-  bool registerScene(std::string sceneName);
 
-
-  bool switchCurrentScene(std::string newSceneName);
+  void switchCurrentScene(std::unique_ptr<Scene> newScene);
 
 
   
 
 private:
-  
 
-
-  CurrentScene currentScene;
-
-
-  std::unordered_set<std::string> sceneRegistry;
+  std::unique_ptr<Scene> currentScene;
 
 };
 

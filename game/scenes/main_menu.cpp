@@ -6,7 +6,7 @@ namespace Game::Scenes {
 
 class MainMenu final : public Engine::Scene::Scene {
 public:
-  virtual std::unique_ptr<Scene> load() override {
+  void load() override {
 
   }
 };
