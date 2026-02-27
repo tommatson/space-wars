@@ -1,5 +1,6 @@
 #include "keyboard_movement_controller.hpp"
 
+namespace Engine { namespace Renderer {
 
 void KeyboardMovementController::moveInPlaneXZ(GLFWwindow* window, float dt, GameObject& gameObject){
 
@@ -48,3 +49,4 @@ void KeyboardMovementController::moveInPlaneXZ(GLFWwindow* window, float dt, Gam
 
 }
 
+} } // namespace Engine::Renderer

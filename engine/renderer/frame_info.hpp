@@ -7,6 +7,8 @@
 
 #define MAX_LIGHTS 10 
 
+namespace Engine { namespace Renderer {
+
 struct PointLight {
   glm::vec4 position{};
   glm::vec4 color{};
@@ -30,6 +32,4 @@ struct FrameInfo {
   GameObject::Map& gameObjects;
 };
 
-
-
-
+} } // namespace Engine::Renderer

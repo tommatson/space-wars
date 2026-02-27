@@ -1,6 +1,8 @@
 #pragma once
 #include <cstdint>
 
+namespace Engine { namespace Network {
+
 class Socket {
 public:
   Socket();
@@ -18,3 +20,5 @@ private:
 
 
 };
+
+} } // namespace Engine::Network

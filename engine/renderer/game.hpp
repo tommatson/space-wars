@@ -11,6 +11,8 @@
 #include <memory>
 #include <vector>
 
+namespace Engine { namespace Renderer {
+
 class Game {
 public:
   static constexpr int WIDTH = 800;
@@ -39,3 +41,5 @@ private:
   std::unique_ptr<DescriptorPool> globalPool{};
   GameObject::Map gameObjects;
 };
+
+} } // namespace Engine::Renderer

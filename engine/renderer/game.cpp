@@ -18,6 +18,7 @@
 #include <array>
 #include <cassert>
 
+namespace Engine { namespace Renderer {
 
 Game::Game(){
   globalPool = DescriptorPool::Builder(device)
@@ -173,6 +174,4 @@ void Game::loadGameObjects(){
 
 }
 
-
-
-
+} } // namespace Engine::Renderer

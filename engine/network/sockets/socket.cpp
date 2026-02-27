@@ -12,7 +12,10 @@
     #include <unistd.h>
 #endif
 
+namespace Engine { namespace Network {
+
 void Socket::open(uint16_t port){
 
 }
 
+} } // namespace Engine::Network

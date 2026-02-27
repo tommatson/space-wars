@@ -2,7 +2,8 @@
  
 #include "device.hpp"
  
- 
+namespace Engine { namespace Renderer {
+
 class Buffer {
  public:
   Buffer(
@@ -54,4 +55,5 @@ class Buffer {
   VkBufferUsageFlags usageFlags;
   VkMemoryPropertyFlags memoryPropertyFlags;
 };
- 
+
+} } // namespace Engine::Renderer

@@ -8,6 +8,8 @@
 #include <vector>
 #include <cassert>
 
+namespace Engine { namespace Renderer {
+
 class Renderer{
 public:
 
@@ -60,3 +62,4 @@ private:
   bool isFrameStarted{false};
 };
 
+} } // namespace Engine::Renderer

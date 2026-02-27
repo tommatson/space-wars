@@ -5,6 +5,8 @@
 #include <glm/glm.hpp>
 
 
+namespace Engine { namespace Renderer {
+
 class Camera{
 public:
 
@@ -36,3 +38,5 @@ private:
 
 
 };
+
+} } // namespace Engine::Renderer

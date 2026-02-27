@@ -5,6 +5,7 @@
 #include <string>
 #include <stdexcept>
 
+namespace Engine { namespace Renderer {
 
 Window::Window(int w, int h, std::string name) : width{w}, height{h}, windowName{name} {
   initWindow();
@@ -59,3 +60,5 @@ void Window::framebufferResizeCallback(GLFWwindow *windowParam, int width, int h
   window->width = width;
   window->height = height;
 }
+
+} } // namespace Engine::Renderer

@@ -9,7 +9,7 @@
 #include <set>
 #include <stdexcept>
 
-
+namespace Engine { namespace Renderer {
 
 SwapChain::SwapChain(Device &deviceRef, VkExtent2D extent)
     : device{deviceRef}, windowExtent{extent} {
@@ -429,3 +429,4 @@ VkFormat SwapChain::findDepthFormat() {
       VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 }
 
+} } // namespace Engine::Renderer

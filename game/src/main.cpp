@@ -5,6 +5,7 @@
 #include <iostream>
 #include <stdexcept>
 
+using namespace Engine::Renderer;
 
 
 int main(){

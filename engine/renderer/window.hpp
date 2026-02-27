@@ -5,7 +5,7 @@
 #include <GLFW/glfw3.h>
 #include <string>
 
-
+namespace Engine { namespace Renderer {
 
 class Window{
 
@@ -50,3 +50,4 @@ private:
 
 };
 
+} } // namespace Engine::Renderer

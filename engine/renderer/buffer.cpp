@@ -11,6 +11,8 @@
 #include <cassert>
 #include <cstring>
 
+namespace Engine { namespace Renderer {
+
 
 /**
 * Returns the minimum instance size required to be compatible with devices minOffsetAlignment
@@ -197,3 +199,4 @@ VkResult Buffer::invalidateIndex(int index) {
  return invalidate(alignmentSize, index * alignmentSize);
 }
 
+} } // namespace Engine::Renderer

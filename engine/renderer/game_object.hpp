@@ -8,6 +8,8 @@
 #include <memory>
 #include <unordered_map>
 
+namespace Engine { namespace Renderer {
+
 struct TransformComponent {
   glm::vec3 translation{};
   glm::vec3 scale{1.0f, 1.0f, 1.0f};
@@ -69,3 +71,5 @@ private:
 
 
 };
+
+} } // namespace Engine::Renderer

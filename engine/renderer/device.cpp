@@ -6,6 +6,7 @@
 #include <set>
 #include <unordered_set>
 
+namespace Engine { namespace Renderer {
 
 // local callback functions
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
@@ -530,3 +531,4 @@ void Device::createImageWithInfo(
   }
 }
 
+} } // namespace Engine::Renderer

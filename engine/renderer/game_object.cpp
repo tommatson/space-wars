@@ -1,5 +1,7 @@
 #include "game_object.hpp"
 
+namespace Engine { namespace Renderer {
+
 glm::mat4 TransformComponent::mat4() {
   const float c3 = glm::cos(rotation.z);
   const float s3 = glm::sin(rotation.z);
@@ -68,3 +70,4 @@ GameObject GameObject::makePointLight(float intensity, float radius, glm::vec3 c
   return gameObj;
 }
 
+} } // namespace Engine::Renderer

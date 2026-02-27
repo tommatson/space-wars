@@ -3,6 +3,7 @@
 #include <cassert>
 #include <limits>
 
+namespace Engine { namespace Renderer {
 
 void Camera::setOrthographicProjection(
 float left, float right, float top, float bottom, float near, float far) {
@@ -77,3 +78,5 @@ void Camera::setViewYXZ(glm::vec3 position, glm::vec3 rotation) {
   viewMatrix[3][1] = -glm::dot(v, position);
   viewMatrix[3][2] = -glm::dot(w, position);
 }
+
+} } // namespace Engine::Renderer

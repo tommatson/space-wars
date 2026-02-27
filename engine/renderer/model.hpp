@@ -10,6 +10,8 @@
 #include <memory>
 #include <vector>
 
+namespace Engine { namespace Renderer {
+
 class Model{
 public:
 
@@ -67,3 +69,5 @@ private:
   std::unique_ptr<Buffer> indexBuffer;
 
 };
+
+} } // namespace Engine::Renderer
