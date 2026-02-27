@@ -5,11 +5,9 @@
 #include <iostream>
 #include <stdexcept>
 
-using namespace Engine::Renderer;
-
-
 int main(){
-  Game game;
+  Engine::Renderer::Game game;
+  
 
   try{
     game.run();
