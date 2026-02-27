@@ -6,6 +6,7 @@
 #include "device.hpp"
 #include "vulkan/vulkan_core.h"
 
+namespace Engine { namespace Renderer {
 
 struct PipelineConfigInfo {
 
@@ -64,3 +65,5 @@ private:
 
 
 };
+
+} } // namespace Engine::Renderer

@@ -11,6 +11,8 @@
 #include <memory>
 #include <vector>
 
+namespace Engine { namespace Renderer {
+
 class PointLightSystem {
 public:
 
@@ -37,3 +39,5 @@ private:
   VkPipelineLayout pipelineLayout;
  
 };
+
+} } // namespace Engine::Renderer

@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-
+namespace Engine { namespace Renderer {
 
 struct SwapChainSupportDetails {
   VkSurfaceCapabilitiesKHR capabilities;
@@ -105,3 +105,4 @@ class Device {
   const std::vector<const char *> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 };
 
+} } // namespace Engine::Renderer

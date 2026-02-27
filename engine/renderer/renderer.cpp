@@ -7,6 +7,7 @@
 #include <array>
 #include <cassert>
 
+namespace Engine { namespace Renderer {
 
 Renderer::Renderer(Window& window, Device& device) : window{window}, device{device}{
   recreateSwapChain();
@@ -168,4 +169,4 @@ void Renderer::endSwapChainRenderPass(VkCommandBuffer commandBuffer){
 
 }
 
-
+} } // namespace Engine::Renderer

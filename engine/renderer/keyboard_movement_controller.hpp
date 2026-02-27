@@ -3,6 +3,8 @@
 #include "game_object.hpp"
 #include "window.hpp"
 
+namespace Engine { namespace Renderer {
+
 class KeyboardMovementController{
 public:
     struct KeyMappings {
@@ -26,3 +28,5 @@ public:
   float lookSpeed{1.5f};
 
 };
+
+} } // namespace Engine::Renderer

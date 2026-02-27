@@ -13,6 +13,7 @@
 #include <array>
 #include <cassert>
 
+namespace Engine { namespace Renderer {
 
 struct SimplePushConstantData {
   glm::mat4 modelMatrix{1.0f};
@@ -99,5 +100,4 @@ void RenderSystem::renderGameObjects(FrameInfo& frameInfo){
   }
 }
 
-
-
+} } // namespace Engine::Renderer

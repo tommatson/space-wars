@@ -7,8 +7,9 @@
 #include <unordered_map>
 #include <vector>
  
- 
-class DescriptorSetLayout {
+namespace Engine { namespace Renderer {
+
+ class DescriptorSetLayout {
  public:
   class Builder {
    public:
@@ -98,4 +99,5 @@ class DescriptorWriter {
   DescriptorPool &pool;
   std::vector<VkWriteDescriptorSet> writes;
 };
- 
+
+} } // namespace Engine::Renderer

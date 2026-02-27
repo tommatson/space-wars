@@ -4,8 +4,9 @@
 #include <cassert>
 #include <stdexcept>
  
- 
-// *************** Descriptor Set Layout Builder *********************
+namespace Engine { namespace Renderer {
+
+ // *************** Descriptor Set Layout Builder *********************
  
 DescriptorSetLayout::Builder &DescriptorSetLayout::Builder::addBinding(
     uint32_t binding,
@@ -191,5 +192,5 @@ void DescriptorWriter::overwrite(VkDescriptorSet &set) {
   }
   vkUpdateDescriptorSets(pool.device.device(), writes.size(), writes.data(), 0, nullptr);
 }
- 
- 
+
+} } // namespace Engine::Renderer

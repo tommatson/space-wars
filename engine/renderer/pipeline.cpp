@@ -9,6 +9,8 @@
 #include <stdexcept>
 #include <cassert>
 
+namespace Engine { namespace Renderer {
+
 Pipeline::Pipeline(Device& device, const std::string& vertFilePath, const std::string& fragFilePath, const PipelineConfigInfo& configInfo) : device{device}{
   createGraphicsPipeline(vertFilePath, fragFilePath, configInfo);
 }
@@ -218,3 +220,4 @@ void Pipeline::defaultPipelineConfigInfo(PipelineConfigInfo& configInfo){
   configInfo.attributeDescriptions = Model::Vertex::getAttributeDescriptions();
 }
 
+} } // namespace Engine::Renderer

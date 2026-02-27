@@ -11,6 +11,8 @@
 #include <memory>
 #include <vector>
 
+namespace Engine { namespace Renderer {
+
 class RenderSystem {
 public:
 
@@ -36,3 +38,5 @@ private:
   VkPipelineLayout pipelineLayout;
  
 };
+
+} } // namespace Engine::Renderer

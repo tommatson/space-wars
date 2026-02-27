@@ -14,15 +14,17 @@
 
 namespace std {
 template <>
-struct hash<Model::Vertex>{
-  size_t operator()(Model::Vertex const& vertex) const {
+struct hash<Engine::Renderer::Model::Vertex>{
+  size_t operator()(Engine::Renderer::Model::Vertex const& vertex) const {
     size_t seed = 0;
-    hashCombine(seed, vertex.position, vertex.color, vertex.normal, vertex.uv);
+    Engine::Renderer::hashCombine(seed, vertex.position, vertex.color, vertex.normal, vertex.uv);
     return seed;
   }
 };
 
 } // namespace std 
+
+namespace Engine { namespace Renderer {
 
 Model::Model(Device &device, const Model::Builder &builder) : device{device} {
 
@@ -212,3 +214,5 @@ void Model::Builder::loadModel(const std::string& filepath){
     }
   }
 }
+
+} } // namespace Engine::Renderer

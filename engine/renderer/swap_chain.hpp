@@ -10,6 +10,7 @@
 #include <vector>
 #include <memory>
 
+namespace Engine { namespace Renderer {
 
 class SwapChain {
  public:
@@ -89,4 +90,4 @@ class SwapChain {
   size_t currentFrame = 0;
 };
 
-
+} } // namespace Engine::Renderer

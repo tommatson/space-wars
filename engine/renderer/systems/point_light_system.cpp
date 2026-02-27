@@ -13,6 +13,7 @@
 #include <array>
 #include <cassert>
 
+namespace Engine { namespace Renderer {
 
 struct PointLightPushConstants {
   glm::vec4 position{};
@@ -128,5 +129,4 @@ void PointLightSystem::render(FrameInfo& frameInfo){
 
 }
 
-
-
+} } // namespace Engine::Renderer
