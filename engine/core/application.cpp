@@ -28,10 +28,14 @@ Application::Application(std::unique_ptr<Scene::Scene> initialScene) : sceneMana
     .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, Renderer::SwapChain::MAX_FRAMES_IN_FLIGHT)
     .build();
 
+  // Initialize ImGui
+  imguiManager.init(window, device, renderer.getSwapChainRenderPass(), Renderer::SwapChain::MAX_FRAMES_IN_FLIGHT);
+
   loadGameObjects();
 }
 
 Application::~Application(){
+  imguiManager.shutdown();
 }
 
 
@@ -88,6 +92,9 @@ void Application::run() {
 
     // frameTime = glm::min(frameTime, MAX_FRAME_TIME);
 
+    // Update current scene
+    sceneManager.getCurrentScene()->update(frameTime);
+
     cameraController.moveInPlaneXZ(window.getGLFWwindow(), frameTime, viewerObject);
     camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
 
@@ -118,9 +125,18 @@ void Application::run() {
       renderer.beginSwapChainRenderPass(commandBuffer);
       renderSystem.renderGameObjects(frameInfo);
       pointLightSystem.render(frameInfo);
+
+      // ImGui render
+      imguiManager.newFrame();
+      sceneManager.getCurrentScene()->renderUI();
+      imguiManager.render(commandBuffer);
+
       renderer.endSwapChainRenderPass(commandBuffer);
       renderer.endFrame();
     }
+
+    // Process any pending scene switch (after frame is done)
+    sceneManager.processPendingSceneSwitch(device);
   } 
   vkDeviceWaitIdle(device.device());
 

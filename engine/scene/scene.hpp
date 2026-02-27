@@ -10,6 +10,9 @@
 
 namespace Engine::Scene {
 
+// Forward declaration
+class SceneManager;
+
 class Scene{
 public:
 
@@ -22,7 +25,10 @@ public:
 
 
   virtual void load(Renderer::Device& device) = 0;
+  virtual void update(float dt) {}
+  virtual void renderUI() {}
 
+  void setSceneManager(SceneManager* sm) { sceneManagerPtr = sm; }
 
   Renderer::GameObject::Map& getGameObjects() { return gameObjects; };
   const Renderer::GameObject::Map& getGameObjects() const { return gameObjects; };
@@ -30,6 +36,7 @@ public:
 protected:
 
   Renderer::GameObject::Map gameObjects;
+  SceneManager* sceneManagerPtr = nullptr;
 
 };
 

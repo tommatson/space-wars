@@ -6,6 +6,7 @@
 #include "../renderer/renderer.hpp"
 #include "../renderer/descriptors.hpp"
 #include "../renderer/game_object.hpp"
+#include "../imgui/imgui_manager.hpp"
 
 #include "../scene/scene_manager.hpp"
 #include "../scene/scene.hpp"
@@ -30,6 +31,8 @@ public:
 
   void run();
 
+  Renderer::Device& getDevice() { return device; }
+
 
 
 private:
@@ -42,6 +45,7 @@ private:
  
   std::unique_ptr<Renderer::DescriptorPool> globalPool{};
 
+  ImGuiManager imguiManager;
   Scene::SceneManager sceneManager;
 };
 
