@@ -9,12 +9,14 @@ RENDERER_DIR = $(ENGINE_DIR)/renderer
 SYSTEMS_DIR = $(RENDERER_DIR)/systems
 NETWORK_DIR = $(ENGINE_DIR)/network
 SOCKETS_DIR = $(NETWORK_DIR)/sockets
+CORE_DIR = $(ENGINE_DIR)/core
 GAME_DIR = game/src
 BUILD_DIR = build
 RENDERER_BUILD_DIR = $(BUILD_DIR)/engine/renderer
 SYSTEMS_BUILD_DIR = $(BUILD_DIR)/engine/renderer/systems
 NETWORK_BUILD_DIR = $(BUILD_DIR)/engine/network
 SOCKETS_BUILD_DIR = $(BUILD_DIR)/engine/network/sockets
+CORE_BUILD_DIR = $(BUILD_DIR)/engine/core
 GAME_BUILD_DIR = $(BUILD_DIR)/game/src
 TARGET = $(BUILD_DIR)/space-wars
 
@@ -23,13 +25,15 @@ RENDERER_SRCS = $(wildcard $(RENDERER_DIR)/*.cpp)
 SYSTEMS_SRCS = $(wildcard $(SYSTEMS_DIR)/*.cpp)
 NETWORK_SRCS = $(wildcard $(NETWORK_DIR)/*.cpp)
 SOCKETS_SRCS = $(wildcard $(SOCKETS_DIR)/*.cpp)
+CORE_SRCS = $(wildcard $(CORE_DIR)/*.cpp)
 
 GAME_OBJS = $(GAME_SRCS:$(GAME_DIR)/%.cpp=$(GAME_BUILD_DIR)/%.o)
 RENDERER_OBJS = $(RENDERER_SRCS:$(RENDERER_DIR)/%.cpp=$(RENDERER_BUILD_DIR)/%.o)
 SYSTEMS_OBJS = $(SYSTEMS_SRCS:$(SYSTEMS_DIR)/%.cpp=$(SYSTEMS_BUILD_DIR)/%.o)
 NETWORK_OBJS = $(NETWORK_SRCS:$(NETWORK_DIR)/%.cpp=$(NETWORK_BUILD_DIR)/%.o)
 SOCKETS_OBJS = $(SOCKETS_SRCS:$(SOCKETS_DIR)/%.cpp=$(SOCKETS_BUILD_DIR)/%.o)
-OBJS = $(GAME_OBJS) $(RENDERER_OBJS) $(SYSTEMS_OBJS) $(NETWORK_OBJS) $(SOCKETS_OBJS)
+CORE_OBJS = $(CORE_SRCS:$(CORE_DIR)/%.cpp=$(CORE_BUILD_DIR)/%.o)
+OBJS = $(GAME_OBJS) $(RENDERER_OBJS) $(SYSTEMS_OBJS) $(NETWORK_OBJS) $(SOCKETS_OBJS) $(CORE_OBJS)
 
 VERT_SRCS = $(wildcard shaders/*.vert)
 FRAG_SRCS = $(wildcard shaders/*.frag)
@@ -64,8 +68,11 @@ $(NETWORK_BUILD_DIR)/%.o: $(NETWORK_DIR)/%.cpp | dirs
 $(SOCKETS_BUILD_DIR)/%.o: $(SOCKETS_DIR)/%.cpp | dirs
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
+$(CORE_BUILD_DIR)/%.o: $(CORE_DIR)/%.cpp | dirs
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
 dirs:
-	mkdir -p $(BUILD_DIR) $(RENDERER_BUILD_DIR) $(SYSTEMS_BUILD_DIR) $(NETWORK_BUILD_DIR) $(SOCKETS_BUILD_DIR) $(GAME_BUILD_DIR)
+	mkdir -p $(BUILD_DIR) $(RENDERER_BUILD_DIR) $(SYSTEMS_BUILD_DIR) $(NETWORK_BUILD_DIR) $(SOCKETS_BUILD_DIR) $(CORE_BUILD_DIR) $(GAME_BUILD_DIR)
 
 clean:
 	rm -rf $(BUILD_DIR)

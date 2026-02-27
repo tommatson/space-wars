@@ -1,10 +1,10 @@
-#include "game.hpp"
+#include "application.hpp"
 
-#include "camera.hpp"
-#include "keyboard_movement_controller.hpp"
-#include "systems/render_system.hpp"
-#include "systems/point_light_system.hpp"
-#include "buffer.hpp"
+#include "../renderer/camera.hpp"
+#include "../renderer/keyboard_movement_controller.hpp"
+#include "../renderer/systems/render_system.hpp"
+#include "../renderer/systems/point_light_system.hpp"
+#include "../renderer/buffer.hpp"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -18,28 +18,28 @@
 #include <array>
 #include <cassert>
 
-namespace Engine { namespace Renderer {
+namespace Engine::Core{
 
-Game::Game(){
-  globalPool = DescriptorPool::Builder(device)
-    .setMaxSets(SwapChain::MAX_FRAMES_IN_FLIGHT)
-    .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SwapChain::MAX_FRAMES_IN_FLIGHT)
+Application::Application(){
+  globalPool = Renderer::DescriptorPool::Builder(device)
+    .setMaxSets(Renderer::SwapChain::MAX_FRAMES_IN_FLIGHT)
+    .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, Renderer::SwapChain::MAX_FRAMES_IN_FLIGHT)
     .build();
-  loadGameObjects();
+  loadApplicationObjects();
  
 }
 
-Game::~Game(){
+Application::~Application(){
 }
 
 
-void Game::run() {
+void Application::run() {
 
-  std::vector<std::unique_ptr<Buffer>> uboBuffers(SwapChain::MAX_FRAMES_IN_FLIGHT);
+  std::vector<std::unique_ptr<Renderer::Buffer>> uboBuffers(Renderer::SwapChain::MAX_FRAMES_IN_FLIGHT);
   for (int i = 0; i < uboBuffers.size(); i++){
-    uboBuffers[i]= std::make_unique<Buffer>(
+    uboBuffers[i]= std::make_unique<Renderer::Buffer>(
       device, 
-      sizeof(GlobalUbo), 
+      sizeof(Renderer::GlobalUbo), 
       1,
       VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
       VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
@@ -48,31 +48,31 @@ void Game::run() {
   }
 
 
-  auto globalSetLayout = DescriptorSetLayout::Builder(device)
+  auto globalSetLayout = Renderer::DescriptorSetLayout::Builder(device)
     .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
     .build();
 
-  std::vector<VkDescriptorSet> globalDescriptorSets(SwapChain::MAX_FRAMES_IN_FLIGHT);
+  std::vector<VkDescriptorSet> globalDescriptorSets(Renderer::SwapChain::MAX_FRAMES_IN_FLIGHT);
   
   for(int i = 0; i < globalDescriptorSets.size(); i++){
     auto bufferInfo = uboBuffers[i]->descriptorInfo();
-    DescriptorWriter(*globalSetLayout, *globalPool)
+    Renderer::DescriptorWriter(*globalSetLayout, *globalPool)
       .writeBuffer(0, &bufferInfo)
       .build(globalDescriptorSets[i]);
   }
 
-  RenderSystem renderSystem{device, renderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout()};
+  Renderer::RenderSystem renderSystem{device, renderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout()};
 
-  PointLightSystem pointLightSystem{device, renderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout()};
+  Renderer::PointLightSystem pointLightSystem{device, renderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout()};
 
 
-  Camera camera{};
+  Renderer::Camera camera{};
   camera.setViewTarget(glm::vec3(-1.0f, -2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 2.5f));
 
-  auto viewerObject = GameObject::createGameObject();
+  auto viewerObject = Renderer::GameObject::createGameObject();
   viewerObject.transform.translation.z = -2.5f;
 
-  KeyboardMovementController cameraController{};
+  Renderer::KeyboardMovementController cameraController{};
 
   auto currentTime = std::chrono::high_resolution_clock::now();
 
@@ -96,7 +96,7 @@ void Game::run() {
 
     if(auto commandBuffer = renderer.beginFrame()){
       int frameIndex = renderer.getFrameIndex();
-      FrameInfo frameInfo{
+      Renderer::FrameInfo frameInfo{
         frameIndex,
         frameTime,
         commandBuffer,
@@ -106,7 +106,7 @@ void Game::run() {
       };
 
       // update
-      GlobalUbo ubo{};
+      Renderer::GlobalUbo ubo{};
       ubo.projection = camera.getProjection(); 
       ubo.view = camera.getView();
       pointLightSystem.update(frameInfo, ubo);
@@ -127,19 +127,19 @@ void Game::run() {
 
 
 
-void Game::loadGameObjects(){
+void Application::loadApplicationObjects(){
 
-  std::shared_ptr<Model> model;
+  std::shared_ptr<Renderer::Model> model;
 
-  model = Model::createModelFromFile(device, "../models/flat_vase.obj"); 
-  auto gameObj = GameObject::createGameObject();
+  model = Renderer::Model::createModelFromFile(device, "../models/flat_vase.obj"); 
+  auto gameObj = Renderer::GameObject::createGameObject();
   gameObj.model = model;
   gameObj.transform.translation = {0.0f, 0.5f, 0.0f};
   gameObj.transform.scale = glm::vec3(3.0f); 
   gameObjects.emplace(gameObj.getId(), std::move(gameObj));
 
-  model = Model::createModelFromFile(device, "../models/quad.obj"); 
-  auto floor = GameObject::createGameObject();
+  model = Renderer::Model::createModelFromFile(device, "../models/quad.obj"); 
+  auto floor = Renderer::GameObject::createGameObject();
   floor.model = model;
   floor.transform.translation = {0.0f, 0.5f, 0.0f};
   floor.transform.scale = {3.0f, 1.0f, 3.0f}; 
@@ -159,7 +159,7 @@ void Game::loadGameObjects(){
 
   for (int i = 0; i < lightColors.size(); i++){
 
-    auto pointLight = GameObject::makePointLight(0.2f);
+    auto pointLight = Renderer::GameObject::makePointLight(0.2f);
     pointLight.color = lightColors[i];
     auto rotateLight = glm::rotate(glm::mat4(1.0f), 
                                    (i * glm::two_pi<float>()) / lightColors.size(),
@@ -174,4 +174,4 @@ void Game::loadGameObjects(){
 
 }
 
-} } // namespace Engine::Renderer
+} // namespace Engine::Core

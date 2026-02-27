@@ -1,4 +1,4 @@
-#include "../../engine/renderer/game.hpp"
+#include "../../engine/core/application.hpp"
 #include "../../engine/network/network_manager.hpp"
 
 #include <cstdlib>
@@ -7,7 +7,7 @@
 #include <stdexcept>
 
 int main(){
-  Engine::Renderer::Game game;
+  Engine::Core::Application app;
   Engine::Network::NetworkManager networkManager;
 
   
@@ -26,7 +26,7 @@ int main(){
   
 
   try{
-    game.run();
+    app.run();
   }
   catch (const std::exception &e){
     std::cerr << e.what() << "\n";
