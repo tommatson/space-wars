@@ -30,7 +30,7 @@ public:
 
 
 private:
-  void loadApplicationObjects();
+  void loadGameObjects();
 
   Renderer::Window window{WIDTH, HEIGHT, "Space Wars"};
   Renderer::Device device{window};  

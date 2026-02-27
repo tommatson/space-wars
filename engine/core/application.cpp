@@ -25,7 +25,7 @@ Application::Application(){
     .setMaxSets(Renderer::SwapChain::MAX_FRAMES_IN_FLIGHT)
     .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, Renderer::SwapChain::MAX_FRAMES_IN_FLIGHT)
     .build();
-  loadApplicationObjects();
+  loadGameObjects();
  
 }
 
@@ -127,7 +127,7 @@ void Application::run() {
 
 
 
-void Application::loadApplicationObjects(){
+void Application::loadGameObjects(){
 
   std::shared_ptr<Renderer::Model> model;
 
