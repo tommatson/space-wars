@@ -2,6 +2,7 @@
 #include "engine/config.hpp"
 
 #include "sockets/socket.hpp"
+#include "sockets/udp_socket.hpp"
 #include "endpoint.hpp"
 
 #include <optional>
@@ -37,10 +38,9 @@ private:
 
   bool initializeNetwork(uint16_t port, NetworkRole newRole);
   
-  bool initializeSocket(uint16_t port, Socket socket);
+  bool initializeSocket(uint16_t port, Socket& socket);
 
-  Socket udpSocket;
-  Socket tcpSocket;
+  UdpSocket udpSocket;
 };
 }
 

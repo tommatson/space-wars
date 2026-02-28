@@ -29,7 +29,7 @@ NetworkManager::~NetworkManager() {
 #endif
 }
 
-bool NetworkManager::initializeSocket(uint16_t port, Socket socket){
+bool NetworkManager::initializeSocket(uint16_t port, Socket& socket){
   if (socket.isOpen()) return false;
 
   // Error in socket opening
