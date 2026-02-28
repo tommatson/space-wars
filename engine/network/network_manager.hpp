@@ -27,6 +27,9 @@ public:
   bool initializeServer();
   bool initializeClient();
 
+  std::optional<Endpoint> getUdpSocketAddress();
+  std::optional<Endpoint> getTcpSocketAddress();
+
 private:
 
   enum class NetworkRole{
@@ -40,6 +43,8 @@ private:
   bool initializeNetwork(uint16_t port, NetworkRole newRole);
   
   bool initializeSocket(uint16_t port, Socket& socket);
+
+  std::optional<Endpoint> getSocketAddress(Socket& socket);
 
   UdpSocket udpSocket;
   TcpSocket tcpSocket;

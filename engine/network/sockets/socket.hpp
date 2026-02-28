@@ -23,6 +23,8 @@ public:
   
   virtual int receive(char* senderAddressBuffer, int addressBufferSize, uint16_t& senderPort, void* data, int maxSize) = 0;
 
+  virtual std::optional<Endpoint> getSocketAddress() = 0; 
+
 
 protected:
   int m_socket;

@@ -21,6 +21,11 @@ public:
     ImGui::SetCursorPosY(40.0f);
 
     ImGui::TextUnformatted(title);
+
+    ImGui::Spacing();
+
+    
+
   }
 
 private:

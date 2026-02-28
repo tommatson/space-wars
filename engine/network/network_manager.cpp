@@ -65,20 +65,25 @@ bool NetworkManager::initializeClient(){
   return initializeNetwork(0, NetworkRole::Client);
 }
 
-//
-// std::optional<Endpoint> NetworkManager::getSocketAddress(){
-//
-//   std::optional<Endpoint> address = socket.getSocketAddress();
-//
-//   if (!address) {
-//     socket.closeSocket();
-//     role = NetworkRole::Uninitialized;
-//     return std::nullopt;
-//   }
-//
-//   return address;
-//
-// }
 
+std::optional<Endpoint> NetworkManager::getSocketAddress(Socket& socket){
+
+  std::optional<Endpoint> address = socket.getSocketAddress();
+
+  if (!address) {
+    socket.closeSocket();
+    role = NetworkRole::Uninitialized;
+    return std::nullopt;
+  }
+  return address;
+}
+
+std::optional<Endpoint> NetworkManager::getUdpSocketAddress() {
+  return getSocketAddress(udpSocket);
+}
+
+std::optional<Endpoint> NetworkManager::getTcpSocketAddress() {
+  return getSocketAddress(tcpSocket);
+}
 
 } // namespace Engine::Network

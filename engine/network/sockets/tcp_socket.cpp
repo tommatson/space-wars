@@ -166,4 +166,22 @@ int TcpSocket::receive(char* senderAddressBuffer, int addressBufferSize,
     return receivedBytes;
 }
 
+std::optional<Endpoint> TcpSocket::getSocketAddress() {
+    if (!isOpen()) return std::nullopt;
+
+    sockaddr_in6 address{};
+    socklen_t length = sizeof(address);
+
+    if (getsockname(m_socket, (sockaddr*)&address, &length) < 0) {
+        return std::nullopt;
+    }
+
+    Endpoint endpoint;
+    endpoint.port = ntohs(address.sin6_port);
+
+    std::memcpy(endpoint.ip.data(), &address.sin6_addr, 16);
+
+    return endpoint;
+}
+
 } // namespace Engine::Network

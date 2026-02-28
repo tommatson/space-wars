@@ -7,7 +7,6 @@ namespace Engine::Network {
 class TcpSocket : public Socket {
 public:
 
-  
   bool openSocket(uint16_t port) override;
   void closeSocket() override;
   bool isOpen() const override;
@@ -16,12 +15,7 @@ public:
 
   int receive(char* senderAddressBuffer, int addressBufferSize, uint16_t& senderPort, void* data, int maxSize) override;
 
-
-
-private:
-
-
-
+  std::optional<Endpoint> getSocketAddress() override;
 };
 
 } // namespace Engine::Network
