@@ -4,6 +4,7 @@
 #include "../renderer/device.hpp"
 #include "../renderer/descriptors.hpp"
 
+#include "imgui.h"
 #include <vulkan/vulkan.h>
 
 namespace Engine {
@@ -21,8 +22,13 @@ public:
   void render(VkCommandBuffer commandBuffer);
   void shutdown();
 
+  ImFont* getTerminalFont() const { return terminalFont; }
+  ImFont* getTitleFont() const { return titleFont; }
+
 private:
   bool initialized = false;
+  ImFont* terminalFont = nullptr;
+  ImFont* titleFont = nullptr;
 };
 
 } // namespace Engine

@@ -35,6 +35,16 @@ void ImGuiManager::init(Renderer::Window& window, Renderer::Device& device, VkRe
   // Setup style
   ImGui::StyleColorsDark();
 
+  // Load fonts
+  terminalFont = io.Fonts->AddFontFromFileTTF("../assets/fonts/SFNSMono.ttf", 18.0f);
+  titleFont = io.Fonts->AddFontFromFileTTF("../assets/fonts/SFNSMono.ttf", 14.0f);
+  if (!terminalFont) {
+    terminalFont = io.Fonts->AddFontDefault();
+  }
+  if (!titleFont) {
+    titleFont = io.Fonts->AddFontDefault();
+  }
+
   // Setup Platform/Renderer backends
   ImGui_ImplGlfw_InitForVulkan(window.getGLFWwindow(), true);
 
