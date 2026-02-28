@@ -1,5 +1,8 @@
 #include "network_manager.hpp"
 
+#include "sockets/socket.hpp"
+#include "sockets/udp_socket.hpp"
+
 #if defined(_WIN32)
 #pragma comment(lib, "ws2_32.lib")
 #include <winsock2.h>
@@ -26,44 +29,52 @@ NetworkManager::~NetworkManager() {
 #endif
 }
 
-bool NetworkManager::initializeSocket(uint16_t port, NetworkRole newRole){
-
-
-  if (role != NetworkRole::Uninitialized) return false;  
+bool NetworkManager::initializeSocket(uint16_t port, Socket socket){
   if (socket.isOpen()) return false;
 
   // Error in socket opening
   if (!socket.openSocket(port)) return false;
     
-  role = newRole;
+  return true;
+
+}
+
+bool NetworkManager::initializeNetwork(uint16_t port, NetworkRole newRole){
+  if (role != NetworkRole::Uninitialized) return false;
   
+  udpSocket = UdpSocket(); 
+  if (!initializeSocket(port, udpSocket)) return false;
+
+  role = newRole;
   return true;
 
 }
 
 
 bool NetworkManager::initializeServer(){
-  return initializeSocket(Config::SERVER_PORT, NetworkRole::Server);
+
+  return initializeNetwork(Config::SERVER_PORT, NetworkRole::Server);
 }
 
 bool NetworkManager::initializeClient(){
-  return initializeSocket(0, NetworkRole::Client);
+  
+  return initializeNetwork(0, NetworkRole::Client);
 }
 
-
-std::optional<Endpoint> NetworkManager::getSocketAddress(){
-
-  std::optional<Endpoint> address = socket.getSocketAddress();
-
-  if (!address) {
-    socket.closeSocket();
-    role = NetworkRole::Uninitialized;
-    return std::nullopt;
-  }
-
-  return address;
-
-}
+//
+// std::optional<Endpoint> NetworkManager::getSocketAddress(){
+//
+//   std::optional<Endpoint> address = socket.getSocketAddress();
+//
+//   if (!address) {
+//     socket.closeSocket();
+//     role = NetworkRole::Uninitialized;
+//     return std::nullopt;
+//   }
+//
+//   return address;
+//
+// }
 
 
 } // namespace Engine::Network

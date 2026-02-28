@@ -18,32 +18,29 @@ public:
   NetworkManager (const NetworkManager& ) = delete;
   NetworkManager &operator=(const NetworkManager&) = delete;
 
-  bool initializeServer();
-  bool initializeClient();
-
-  std::optional<Endpoint> getSocketAddress();
+  // std::optional<Endpoint> getSocketAddress();
 
   bool sendMailbox();
 
+  bool initializeServer();
+  bool initializeClient();
 
 private:
 
   enum class NetworkRole{
     Uninitialized,
-    Client,
-    Server
+    Server,
+    Client
   };
 
   NetworkRole role = NetworkRole::Uninitialized;
 
-  Socket socket;
+  bool initializeNetwork(uint16_t port, NetworkRole newRole);
+  
+  bool initializeSocket(uint16_t port, Socket socket);
 
-  bool initializeSocket(uint16_t port, NetworkRole newRole);
-
-
-
-
-
+  Socket udpSocket;
+  Socket tcpSocket;
 };
 }
 
