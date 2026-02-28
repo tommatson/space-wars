@@ -1,4 +1,5 @@
-#include "socket.hpp"
+#include "udp_socket.hpp"
+
 #include <iostream>
 #include <cstring>
 #include <string>
@@ -17,31 +18,11 @@
   #include <unistd.h>
 #endif
 
-namespace Engine {
-namespace Network {
+namespace Engine::Network {
 
-bool initializeSockets() {
-#if defined(_WIN32)
-    WSADATA WsaData;
-    return WSAStartup(MAKEWORD(2, 2), &WsaData) == NO_ERROR;
-#else
-    return true;
-#endif
-}
 
-void shutdownSockets() {
-#if defined(_WIN32)
-    WSACleanup();
-#endif
-}
 
-Socket::Socket() : m_socket(0) {}
-
-Socket::~Socket() {
-    closeSocket();
-}
-
-bool Socket::openSocket(uint16_t port) {
+bool UdpSocket::openSocket(uint16_t port) {
     // Create a dual-stack IPv6 socket (also accepts IPv4 via mapped addresses)
     m_socket = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
     if (m_socket <= 0) {
@@ -87,7 +68,7 @@ bool Socket::openSocket(uint16_t port) {
     return true;
 }
 
-void Socket::closeSocket() {
+void UdpSocket::closeSocket() {
     if (m_socket != 0) {
       
 #if defined(_WIN32)
@@ -99,11 +80,11 @@ void Socket::closeSocket() {
     }
 }
 
-bool Socket::isOpen() const {
+bool UdpSocket::isOpen() const {
     return m_socket != 0;
 }
 
-bool Socket::send(const char* destinationAddress, uint16_t destinationPort,
+bool UdpSocket::send(const char* destinationAddress, uint16_t destinationPort,
                   const void* data, int size) {
     if (!isOpen()) return false;
 
@@ -147,7 +128,7 @@ bool Socket::send(const char* destinationAddress, uint16_t destinationPort,
     return sentBytes == size;
 }
 
-int Socket::receive(char* senderAddressBuffer, int addressBufferSize,
+int UdpSocket::receive(char* senderAddressBuffer, int addressBufferSize,
                     uint16_t& senderPort, void* data, int maxSize) {
     if (!isOpen()) return 0;
 
@@ -194,25 +175,23 @@ int Socket::receive(char* senderAddressBuffer, int addressBufferSize,
 
     return receivedBytes;
 }
+// std::optional<Endpoint> Socket::getSocketAddress() {
+//     if (!isOpen()) return std::nullopt;
+//
+//     sockaddr_in6 address{};
+//     socklen_t length = sizeof(address);
+//
+//     if (getsockname(m_socket, (sockaddr*)&address, &length) < 0) {
+//         return std::nullopt;
+//     }
+//
+//     Endpoint endpoint;
+//     endpoint.port = ntohs(address.sin6_port);
+//
+//
+//     std::memcpy(endpoint.ip.data(), &address.sin6_addr, 16);
+//
+//     return endpoint;
+// }
 
-std::optional<Endpoint> Socket::getSocketAddress() {
-    if (!isOpen()) return std::nullopt;
-
-    sockaddr_in6 address{};
-    socklen_t length = sizeof(address);
-
-    if (getsockname(m_socket, (sockaddr*)&address, &length) < 0) {
-        return std::nullopt;
-    }
-
-    Endpoint endpoint;
-    endpoint.port = ntohs(address.sin6_port);
-
-
-    std::memcpy(endpoint.ip.data(), &address.sin6_addr, 16);
-
-    return endpoint;
-}
-
-} // namespace Network
-} // namespace Engine
+} // namespace Engine::Network
