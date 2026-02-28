@@ -3,6 +3,8 @@
 #include "../../../engine/imgui/view/view.hpp"
 #include "../../../engine/imgui/view/view_manager.hpp"
 
+#include "../../../engine/network/network_manager.hpp"
+
 #include "lobby_view.hpp"
 
 
@@ -10,8 +12,8 @@ namespace Game::Scenes::MainMenu {
 
 class StartView : public Engine::UI::View::View {
 public:
-  StartView(int windowWidth, Engine::UI::View::ViewManager& viewManager)
-      : windowWidth(windowWidth), viewManager(viewManager) {
+  StartView(int windowWidth, Engine::UI::View::ViewManager& viewManager, Engine::Network::NetworkManager& networkManager)
+      : windowWidth(windowWidth), viewManager(viewManager), networkManager(networkManager) {
 
   }
 
@@ -32,14 +34,26 @@ public:
     ImGui::SetCursorPosX((windowWidth - buttonWidth) * 0.5f);
     ImGui::SetCursorPosY(100.0f);
 
-    if (ImGui::Button("[ PLAY ]", ImVec2(buttonWidth, buttonHeight))) {
-        viewManager.pushView(std::make_unique<LobbyView>(windowWidth, viewManager));
+    if (ImGui::Button("[ HOST ]", ImVec2(buttonWidth, buttonHeight))) {
+        if (networkManager.initializeServer()) {
+            viewManager.pushView(std::make_unique<LobbyView>(windowWidth, viewManager, networkManager));
+        }
+    }
+
+    ImGui::SetCursorPosX((windowWidth - buttonWidth) * 0.5f);
+    ImGui::SetCursorPosY(150.0f);
+
+    if (ImGui::Button("[ JOIN ]", ImVec2(buttonWidth, buttonHeight))) {
+        if (networkManager.initializeClient()) {
+            viewManager.pushView(std::make_unique<LobbyView>(windowWidth, viewManager, networkManager));
+        }
     }
   }
 
 private:
   int windowWidth;
   Engine::UI::View::ViewManager& viewManager;
+  Engine::Network::NetworkManager& networkManager;
 };
 
 } // namespace Game::Scenes::MainMenu

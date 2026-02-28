@@ -14,23 +14,8 @@
 
 int main(){
 
-  Engine::Core::Application app(std::make_unique<Game::Scenes::MainMenu::MainMenu>());
   Engine::Network::NetworkManager networkManager;
-
-  
-  if(networkManager.initializeClient()){
-    std::optional<Engine::Network::Endpoint> socketAddress = networkManager.getSocketAddress();
-    if (socketAddress){
-      Engine::Network::Endpoint address = *socketAddress;
-      std::cout << "Socket opened on port " << address.port << '\n';
-    } else {
-      std::cout << "Failed to get socket address" << '\n';
-    }
-  } else{
-    std::cout << "Failed to initialize client" << '\n';
-  }
-  
-  
+  Engine::Core::Application app(std::make_unique<Game::Scenes::MainMenu::MainMenu>(networkManager));
 
   try{
     app.run();
