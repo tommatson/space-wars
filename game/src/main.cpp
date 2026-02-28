@@ -2,7 +2,7 @@
 #include "../../engine/network/network_manager.hpp"
 
 #include "../../engine/scene/scene.hpp"
-#include "../scenes/main_menu.hpp"
+#include "../scenes/main_menu/main_menu.hpp"
 
 
 
@@ -14,7 +14,7 @@
 
 int main(){
 
-  Engine::Core::Application app(std::make_unique<Game::Scenes::MainMenu>());
+  Engine::Core::Application app(std::make_unique<Game::Scenes::MainMenu::MainMenu>());
   Engine::Network::NetworkManager networkManager;
 
   
