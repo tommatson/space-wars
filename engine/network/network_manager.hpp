@@ -3,6 +3,7 @@
 
 #include "sockets/socket.hpp"
 #include "sockets/udp_socket.hpp"
+#include "sockets/tcp_socket.hpp"
 #include "endpoint.hpp"
 
 #include <optional>
@@ -41,6 +42,7 @@ private:
   bool initializeSocket(uint16_t port, Socket& socket);
 
   UdpSocket udpSocket;
+  TcpSocket tcpSocket;
 };
 }
 

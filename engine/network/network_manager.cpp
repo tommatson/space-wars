@@ -2,6 +2,7 @@
 
 #include "sockets/socket.hpp"
 #include "sockets/udp_socket.hpp"
+#include "sockets/tcp_socket.hpp"
 
 #if defined(_WIN32)
 #pragma comment(lib, "ws2_32.lib")
@@ -44,6 +45,9 @@ bool NetworkManager::initializeNetwork(uint16_t port, NetworkRole newRole){
   
   udpSocket = UdpSocket(); 
   if (!initializeSocket(port, udpSocket)) return false;
+
+  tcpSocket = TcpSocket();
+  if (!initializeSocket(port, tcpSocket)) return false;
 
   role = newRole;
   return true;
