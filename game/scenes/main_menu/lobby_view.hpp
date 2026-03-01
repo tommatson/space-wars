@@ -41,11 +41,6 @@ public:
     }
 
     std::optional<Engine::Network::Endpoint> myAddress = networkManager.getTcpSocketAddress();
-
-    socketIpText = myAddress ? myAddress->ip : "ERROR";
-
-    
-
   }
 
 private:
