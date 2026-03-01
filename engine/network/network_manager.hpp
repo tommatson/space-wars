@@ -7,6 +7,8 @@
 #include "endpoint.hpp"
 
 #include <optional>
+#include <string>
+#include <array>
 
 
 namespace Engine::Network {
@@ -14,6 +16,13 @@ namespace Engine::Network {
 
 class NetworkManager{
 public:
+
+  enum class NetworkRole{
+    Uninitialized,
+    Server,
+    Client
+  };
+  
   NetworkManager();
   ~NetworkManager();
 
@@ -30,13 +39,12 @@ public:
   std::optional<Endpoint> getUdpSocketAddress();
   std::optional<Endpoint> getTcpSocketAddress();
 
+  NetworkRole getRole();
+
+  std::string convertIpToString(std::array<uint8_t , 16> ip); 
+
 private:
 
-  enum class NetworkRole{
-    Uninitialized,
-    Server,
-    Client
-  };
 
   NetworkRole role = NetworkRole::Uninitialized;
 

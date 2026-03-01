@@ -86,4 +86,12 @@ std::optional<Endpoint> NetworkManager::getTcpSocketAddress() {
   return getSocketAddress(tcpSocket);
 }
 
+
+NetworkManager::NetworkRole NetworkManager::getRole(){
+  return role;
+}
+
+std::string NetworkManager::convertIpToString(std::array<uint8_t , 16> ip){
+}
+
 } // namespace Engine::Network
