@@ -23,7 +23,8 @@ public:
   TcpServer &operator=(const TcpServer&) = delete;
 
 
-  void listenForConnections();
+  void listenForClients();
+
 
   void listen();
 
@@ -38,6 +39,8 @@ private:
     int connfd;
     uint8_t playerId;
   };
+
+  int sockfd;
 
   std::unordered_map<uint8_t, int> clientMap;
 };

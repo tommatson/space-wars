@@ -1,4 +1,6 @@
 #include "tcp_server.hpp"
+#include <fcntl.h>
+#include <cerrno>
 
 #define MAX 80 
 #define PORT 8080 
@@ -8,7 +10,7 @@ namespace Engine::Network {
 
 TcpServer::TcpServer(){
   
-  int sockfd, connfd, len; 
+  int connfd, len; 
   struct sockaddr_in servaddr, cli; 
 
   // socket create and verification 
@@ -19,6 +21,18 @@ TcpServer::TcpServer(){
   } 
   else
       std::cerr << "Socket successfully created.." << '\n'; 
+
+  int flags = fcntl(sockfd, F_GETFL, 0);
+  if (flags == -1) {
+    std::cerr << "fcntl F_GETFL failed...\n";
+  } else {
+    if (fcntl(sockfd, F_SETFL, flags | O_NONBLOCK) == -1) {
+      std::cerr << "fcntl F_SETFL failed...\n";
+    } else {
+      std::cerr << "Socket set to non-blocking...\n";
+    }
+  }
+
   memset(&servaddr, 0, sizeof(servaddr)); 
 
   // assign IP, PORT 
@@ -35,25 +49,46 @@ TcpServer::TcpServer(){
       std::cerr << "Socket successfully binded..." << '\n'; 
 
   // Now server is ready to listen and verification 
-  if ((::listen(sockfd, 5)) != 0) { 
+  if ((::listen(sockfd, 10)) != 0) { 
     std::cerr << "Listen failed...\n"; 
     return; 
   } 
   else
     std::cerr << "Server listening..\n"; 
-  len = sizeof(cli); 
+
    
 }
 
 TcpServer::~TcpServer() {}
 
 
-void TcpServer::listenForConnections(){
 
-
-
+void TcpServer::registerClientConnection(int connfd){
 
 }
+
+
+void TcpServer::listenForClients(){
+  for (;;){
+    struct sockaddr_in cli;
+    socklen_t len = sizeof(cli);
+    int connfd = accept(sockfd, (SA*)&cli, &len);
+
+    if (connfd < 0) {
+      if (errno == EAGAIN || errno == EWOULDBLOCK)
+        break;   // No more pending connections
+      else
+        std::cerr << "Error in connection" << '\n';
+    } else {
+
+      // handle client
+
+
+
+    }
+  }
+}
+
 
 
 
