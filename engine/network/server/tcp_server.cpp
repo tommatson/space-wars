@@ -1,34 +1,63 @@
 #include "tcp_server.hpp"
 
+#define MAX 80 
+#define PORT 8080 
+#define SA struct sockaddr 
 
 namespace Engine::Network {
 
 TcpServer::TcpServer(){
-  int server_fd, new_socket;
-  struct sockaddr_in address;
-  int opt = 1;
-  int addrlen = sizeof(address);
+  
+  int sockfd, connfd, len; 
+  struct sockaddr_in servaddr, cli; 
 
-  if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
-    std::cerr << "Socket creation failed" << std::endl;
-    return;
-  }
+  // socket create and verification 
+  sockfd = socket(AF_INET, SOCK_STREAM, 0); 
+  if (sockfd == -1) { 
+    std::cerr << "socket creation failed..." << '\n'; 
+    return; 
+  } 
+  else
+      std::cerr << "Socket successfully created.." << '\n'; 
+  memset(&servaddr, 0, sizeof(servaddr)); 
 
-  setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+  // assign IP, PORT 
+  servaddr.sin_family = AF_INET; 
+  servaddr.sin_addr.s_addr = htonl(INADDR_ANY); 
+  servaddr.sin_port = htons(PORT); 
 
-  address.sin_family = AF_INET;
-  address.sin_addr.s_addr = INADDR_ANY; // Listen on all available network interfaces
-  address.sin_port = htons(8080);       // Port 8080
+  // Binding newly created socket to given IP and verification 
+  if ((bind(sockfd, (SA*)&servaddr, sizeof(servaddr))) != 0) { 
+    std::cerr << "socket bind failed..." << '\n'; 
+    return; 
+  } 
+  else
+      std::cerr << "Socket successfully binded..." << '\n'; 
 
-  if (bind(server_fd, (struct sockaddr*)&address, sizeof(address)) < 0) {
-      std::cerr << "Bind failed" << std::endl;
-      return;
-  }
+  // Now server is ready to listen and verification 
+  if ((::listen(sockfd, 5)) != 0) { 
+    std::cerr << "Listen failed...\n"; 
+    return; 
+  } 
+  else
+    std::cerr << "Server listening..\n"; 
+  len = sizeof(cli); 
+   
+}
+
+TcpServer::~TcpServer() {}
+
+
+void TcpServer::listenForConnections(){
 
 
 
 
 }
+
+
+
+
 
 
 } // namespace Engine::Network
