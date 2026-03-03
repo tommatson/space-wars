@@ -1,7 +1,8 @@
 include .env
 
 CXX = g++
-CXXFLAGS = -std=c++17 -I. -I$(VULKAN_SDK_PATH)/include -I$(STB_INCLUDE_PATH) -I$(TINYOBJ_INCLUDE_PATH) -Iengine/imgui
+ASIO_DIR = third_party/asio-asio-1-36-0/asio/include
+CXXFLAGS = -std=c++17 -I. -I$(VULKAN_SDK_PATH)/include -I$(STB_INCLUDE_PATH) -I$(TINYOBJ_INCLUDE_PATH) -Iengine/imgui -I$(ASIO_DIR) -DASIO_STANDALONE
 LDFLAGS = -L$(VULKAN_SDK_PATH)/lib -Wl,-rpath,$(VULKAN_SDK_PATH)/lib `pkg-config --static --libs glfw3` -lvulkan
 
 ENGINE_DIR = engine
