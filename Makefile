@@ -1,10 +1,11 @@
 include .env
 
 CXX = g++
-CXXFLAGS = -std=c++17 -I. -I$(VULKAN_SDK_PATH)/include -I$(STB_INCLUDE_PATH) -I$(TINYOBJ_INCLUDE_PATH)
+CXXFLAGS = -std=c++17 -I. -I$(VULKAN_SDK_PATH)/include -I$(STB_INCLUDE_PATH) -I$(TINYOBJ_INCLUDE_PATH) -include engine/memory/memory_overrides.hpp
 LDFLAGS = -L$(VULKAN_SDK_PATH)/lib -Wl,-rpath,$(VULKAN_SDK_PATH)/lib `pkg-config --static --libs glfw3` -lvulkan
 
 ENGINE_DIR = engine
+MEMORY_DIR = $(ENGINE_DIR)/memory
 RENDERER_DIR = $(ENGINE_DIR)/renderer
 SYSTEMS_DIR = $(RENDERER_DIR)/systems
 NETWORK_DIR = $(ENGINE_DIR)/network
@@ -13,23 +14,26 @@ GAME_DIR = game/src
 BUILD_DIR = build
 RENDERER_BUILD_DIR = $(BUILD_DIR)/engine/renderer
 SYSTEMS_BUILD_DIR = $(BUILD_DIR)/engine/renderer/systems
+MEMORY_BUILD_DIR = $(BUILD_DIR)/engine/memory
 NETWORK_BUILD_DIR = $(BUILD_DIR)/engine/network
 SOCKETS_BUILD_DIR = $(BUILD_DIR)/engine/network/sockets
 GAME_BUILD_DIR = $(BUILD_DIR)/game/src
 TARGET = $(BUILD_DIR)/space-wars
 
+MEMORY_SRCS = $(wildcard $(MEMORY_DIR)/*.cpp)
 GAME_SRCS = $(wildcard $(GAME_DIR)/*.cpp)
 RENDERER_SRCS = $(wildcard $(RENDERER_DIR)/*.cpp)
 SYSTEMS_SRCS = $(wildcard $(SYSTEMS_DIR)/*.cpp)
 NETWORK_SRCS = $(wildcard $(NETWORK_DIR)/*.cpp)
 SOCKETS_SRCS = $(wildcard $(SOCKETS_DIR)/*.cpp)
 
+MEMORY_OBJS = $(MEMORY_SRCS:$(MEMORY_DIR)/%.cpp=$(MEMORY_BUILD_DIR)/%.o)
 GAME_OBJS = $(GAME_SRCS:$(GAME_DIR)/%.cpp=$(GAME_BUILD_DIR)/%.o)
 RENDERER_OBJS = $(RENDERER_SRCS:$(RENDERER_DIR)/%.cpp=$(RENDERER_BUILD_DIR)/%.o)
 SYSTEMS_OBJS = $(SYSTEMS_SRCS:$(SYSTEMS_DIR)/%.cpp=$(SYSTEMS_BUILD_DIR)/%.o)
 NETWORK_OBJS = $(NETWORK_SRCS:$(NETWORK_DIR)/%.cpp=$(NETWORK_BUILD_DIR)/%.o)
 SOCKETS_OBJS = $(SOCKETS_SRCS:$(SOCKETS_DIR)/%.cpp=$(SOCKETS_BUILD_DIR)/%.o)
-OBJS = $(GAME_OBJS) $(RENDERER_OBJS) $(SYSTEMS_OBJS) $(NETWORK_OBJS) $(SOCKETS_OBJS)
+OBJS = $(MEMORY_OBJS) $(GAME_OBJS) $(RENDERER_OBJS) $(SYSTEMS_OBJS) $(NETWORK_OBJS) $(SOCKETS_OBJS)
 
 VERT_SRCS = $(wildcard shaders/*.vert)
 FRAG_SRCS = $(wildcard shaders/*.frag)
@@ -49,6 +53,9 @@ shaders/%.frag.spv: shaders/%.frag
 $(TARGET): $(OBJS) | dirs
 	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
 
+$(MEMORY_BUILD_DIR)/%.o: $(MEMORY_DIR)/%.cpp | dirs
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
 $(GAME_BUILD_DIR)/%.o: $(GAME_DIR)/%.cpp | dirs
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
@@ -65,7 +72,7 @@ $(SOCKETS_BUILD_DIR)/%.o: $(SOCKETS_DIR)/%.cpp | dirs
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 dirs:
-	mkdir -p $(BUILD_DIR) $(RENDERER_BUILD_DIR) $(SYSTEMS_BUILD_DIR) $(NETWORK_BUILD_DIR) $(SOCKETS_BUILD_DIR) $(GAME_BUILD_DIR)
+	mkdir -p $(BUILD_DIR) $(MEMORY_BUILD_DIR) $(RENDERER_BUILD_DIR) $(SYSTEMS_BUILD_DIR) $(NETWORK_BUILD_DIR) $(SOCKETS_BUILD_DIR) $(GAME_BUILD_DIR)
 
 clean:
 	rm -rf $(BUILD_DIR)
