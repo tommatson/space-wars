@@ -1,11 +1,11 @@
 #pragma once
 
-
 #include <cstddef>
 #include <cassert>
-#include <new>
 
-
+// -----------------------------------------------------------------------------
+// Core API
+// -----------------------------------------------------------------------------
 void* operator new (std::size_t size);
 void operator delete(void* ptr) noexcept;
 
