@@ -10,14 +10,22 @@ RENDERER_DIR = $(ENGINE_DIR)/renderer
 SYSTEMS_DIR = $(RENDERER_DIR)/systems
 NETWORK_DIR = $(ENGINE_DIR)/network
 SOCKETS_DIR = $(NETWORK_DIR)/sockets
-GAME_DIR = game/src
+SCENE_DIR = $(ENGINE_DIR)/scene
+CORE_DIR = $(ENGINE_DIR)/core
+IMGUI_DIR = $(ENGINE_DIR)/imgui
+GAME_SRC_DIR = game/src
+GAME_SCENES_DIR = game/scenes
 BUILD_DIR = build
 RENDERER_BUILD_DIR = $(BUILD_DIR)/engine/renderer
 SYSTEMS_BUILD_DIR = $(BUILD_DIR)/engine/renderer/systems
 MEMORY_BUILD_DIR = $(BUILD_DIR)/engine/memory
 NETWORK_BUILD_DIR = $(BUILD_DIR)/engine/network
 SOCKETS_BUILD_DIR = $(BUILD_DIR)/engine/network/sockets
-GAME_BUILD_DIR = $(BUILD_DIR)/game/src
+SCENE_BUILD_DIR = $(BUILD_DIR)/engine/scene
+CORE_BUILD_DIR = $(BUILD_DIR)/engine/core
+IMGUI_BUILD_DIR = $(BUILD_DIR)/engine/imgui
+GAME_SRC_BUILD_DIR = $(BUILD_DIR)/game/src
+GAME_SCENES_BUILD_DIR = $(BUILD_DIR)/game/scenes
 TARGET = $(BUILD_DIR)/space-wars
 
 MEMORY_SRCS = $(wildcard $(MEMORY_DIR)/*.cpp)
@@ -26,6 +34,9 @@ RENDERER_SRCS = $(wildcard $(RENDERER_DIR)/*.cpp)
 SYSTEMS_SRCS = $(wildcard $(SYSTEMS_DIR)/*.cpp)
 NETWORK_SRCS = $(wildcard $(NETWORK_DIR)/*.cpp)
 SOCKETS_SRCS = $(wildcard $(SOCKETS_DIR)/*.cpp)
+SCENE_SRCS = $(wildcard $(SCENE_DIR)/*.cpp)
+CORE_SRCS = $(wildcard $(CORE_DIR)/*.cpp)
+IMGUI_SRCS = $(wildcard $(IMGUI_DIR)/*.cpp)
 
 MEMORY_OBJS = $(MEMORY_SRCS:$(MEMORY_DIR)/%.cpp=$(MEMORY_BUILD_DIR)/%.o)
 GAME_OBJS = $(GAME_SRCS:$(GAME_DIR)/%.cpp=$(GAME_BUILD_DIR)/%.o)
@@ -69,6 +80,15 @@ $(NETWORK_BUILD_DIR)/%.o: $(NETWORK_DIR)/%.cpp | dirs
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(SOCKETS_BUILD_DIR)/%.o: $(SOCKETS_DIR)/%.cpp | dirs
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(SCENE_BUILD_DIR)/%.o: $(SCENE_DIR)/%.cpp | dirs
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(CORE_BUILD_DIR)/%.o: $(CORE_DIR)/%.cpp | dirs
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(IMGUI_BUILD_DIR)/%.o: $(IMGUI_DIR)/%.cpp | dirs
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 dirs:
