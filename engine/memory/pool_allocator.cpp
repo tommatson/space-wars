@@ -33,7 +33,7 @@ PoolAllocator::PoolAllocator(void* ptr, std::size_t max_size, std::size_t chunk_
   }
 }
 
-[[nodiscard]] void* PoolAllocator::allocate() noexcept
+[[nodiscard]] void* PoolAllocator::allocate(std::size_t size, std::size_t alignment) noexcept
 {
   if (free_list_head_ == nullptr) [[unlikely]] return nullptr;
 

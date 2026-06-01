@@ -1,13 +1,13 @@
 #pragma once
 
 #include <cstddef>
-
+#include "allocator_concepts.hpp"
 
 
 namespace Engine::Containers{
 
 
-template<typename T, typename A>
+template<typename T, Allocator A>
 class Array{
 public:
   // ---------------------------------------------------------------------------
@@ -49,7 +49,7 @@ private:
   {
     if (new_capacity <= capacity_) return;
 
-    allocator_.allocate
+    allocator_.allocate();
 
 
 
