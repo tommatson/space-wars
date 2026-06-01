@@ -4,35 +4,38 @@
 
 namespace Engine::Memory {
 
-class LinearAllocator {
+class PoolAllocator{
 public:
   // ---------------------------------------------------------------------------
   // Leaders
   // ---------------------------------------------------------------------------
-  LinearAllocator(void* ptr, std::size_t max_size);
+  PoolAllocator(void* ptr, std::size_t max_size, std::size_t chunk_size) noexcept;
 
   // ---------------------------------------------------------------------------
-  // Deleted Semantics
+  // Delete Semantics
   // ---------------------------------------------------------------------------
-  ~LinearAllocator() = delete;
-  LinearAllocator(const LinearAllocator&) = delete;
-  LinearAllocator& operator=(const LinearAllocator&) = delete;
-  LinearAllocator(LinearAllocator&&) = delete;
-  LinearAllocator& operator=(LinearAllocator&&) = delete;
-
+  ~PoolAllocator() = delete;
+  PoolAllocator(const PoolAllocator&) = delete;
+  PoolAllocator& operator= (const PoolAllocator&) = delete;
+  PoolAllocator(const PoolAllocator&&) = delete;
+  PoolAllocator& operator= (const PoolAllocator&&) = delete;
+ 
   // ---------------------------------------------------------------------------
   // Core API
   // ---------------------------------------------------------------------------
-  [[nodiscard]] void* allocate(std::size_t size, std::size_t alignment) noexcept;
+  [[nodiscard]] void* allocate() noexcept;
+  void deallocate(void* ptr) noexcept;
+  
 
-  void clear() noexcept;
 
 private:
-  std::byte* const front_pointer_;
-  std::byte* const back_pointer_;
+  // Immutables
+  const std::size_t max_size_;
+  const std::size_t chunk_size_;
 
-  std::byte* current_pointer_;
+  // Mutables
+  std::byte* free_list_head_;
+
 };
 
 } // namespace Engine::Memory
-
