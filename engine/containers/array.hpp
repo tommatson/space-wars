@@ -53,6 +53,12 @@ public:
   };
 
 
+  T& operator[](std::size_t i) 
+  {
+    assert(i < size_ && "Index out of range.");
+    return front_ptr_[i];
+
+  }
 
 private:
   std::size_t size_;
