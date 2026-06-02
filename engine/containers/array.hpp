@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <cassert>
 #include "allocator_concepts.hpp"
 
 
@@ -21,25 +22,35 @@ public:
   }
   ~Array();
 
-
-
-
   // ---------------------------------------------------------------------------
   // Core API
   // ---------------------------------------------------------------------------
-  std::size_t size() noexcept;
+  std::size_t size() noexcept 
+  {
+    return size_;
+  }
+  
+  std::size_t capacity() noexcept 
+  {
+    return capacity_;
+  }
   
   void push_back(T data) 
   {
     // Check capacity
-    if (size_ + 1 == capacity_ ) reserve(capacity_ ? capacity_ * 2 : 8);
+    if (size_ + 1 == capacity_ ) [[unlikely]] reserve(capacity_ ? capacity_ * 2 : 8);
 
     new (front_ptr_ + size_) T(std::forward(data));
 
     ++size_;
   }
   
-  void pop_back();
+  void pop_back()
+  {
+    assert(size_ > 0 && "Array must contain an element to pop back.");
+
+    front_ptr_[--size_].~T();
+  };
 
 
 
