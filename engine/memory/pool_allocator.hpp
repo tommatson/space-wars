@@ -24,7 +24,7 @@ public:
   // Core API
   // ---------------------------------------------------------------------------
   [[nodiscard]] void* allocate(std::size_t size, std::size_t alignment) noexcept;
-  void deallocate(void* ptr) noexcept;
+  void deallocate(void* ptr, std::size_t bytes) noexcept;
   
 
 

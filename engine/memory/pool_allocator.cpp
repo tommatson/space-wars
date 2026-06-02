@@ -45,7 +45,7 @@ PoolAllocator::PoolAllocator(void* ptr, std::size_t max_size, std::size_t chunk_
   return chunk;
 }
 
-void PoolAllocator::deallocate(void* ptr) noexcept 
+void PoolAllocator::deallocate(void* ptr, std::size_t bytes) noexcept 
 {
   assert(ptr != nullptr && "Pool allocator cannot deallocate a nullptr.");
 

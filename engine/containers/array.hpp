@@ -29,7 +29,15 @@ public:
   // ---------------------------------------------------------------------------
   std::size_t size() noexcept;
   
-  void push_back(T);
+  void push_back(T data) 
+  {
+    // Check capacity
+    if (size_ + 1 == capacity_ ) reserve(capacity_ ? capacity_ * 2 : 8);
+
+    new (front_ptr_ + size_) T(std::forward(data));
+
+    ++size_;
+  }
   
   void pop_back();
 
@@ -41,7 +49,7 @@ private:
 
   A& allocator_;
   
-  T* const front_ptr_;
+  T* front_ptr_;
 
   void* memory_segment_;
 
@@ -49,12 +57,18 @@ private:
   {
     if (new_capacity <= capacity_) return;
 
-    allocator_.allocate();
+    T* new_data  = reinterpret_cast<T*>(allocator_.allocate(new_capacity * sizeof(T), alignof(T)));
 
+    // Move in the existing elements
+    for(std::size_t i = 0; i < size_; ++i){
+      new (new_data + i) T(std::move(front_ptr_[i])); 
+    }
 
+    allocator_.deallocate(reinterpret_cast<void*>(front_ptr_), capacity_ * sizeof(T));
 
+    front_ptr_ = new_data;
+    capacity_ = new_capacity;
 
-    
   }
 
 };
