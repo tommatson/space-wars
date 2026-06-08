@@ -16,14 +16,15 @@ void* operator new[](std::size_t)
   throw std::bad_alloc();
 }
 
-void operator delete(void* ptr) noexcept 
+void operator delete(void* ptr) noexcept
 {
   assert(false && "Standard deletions are stricly forbidden!");
   __builtin_unreachable();
 }
 
-void operator delete[](void* ptr) noexcept 
+void operator delete[](void* ptr) noexcept  
 {
   assert(false && "Standard array deletions are strictly forbidden!");
   __builtin_unreachable();
 }
+

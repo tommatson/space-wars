@@ -4,22 +4,21 @@
 #include "pool_allocator.hpp"
 #include "system_arena.hpp"
 
-#include <memory>
+#include <optional>
 
 namespace Engine::Memory {
 
 class MemoryManager {
 public:
-
   // ---------------------------------------------------------------------------
   // Leaders
   // ---------------------------------------------------------------------------
   MemoryManager() = default;
+  ~MemoryManager() = default;
 
   // ---------------------------------------------------------------------------
   // Deleted Semantics
   // ---------------------------------------------------------------------------
-  ~MemoryManager() = delete;
   MemoryManager(const MemoryManager&) = delete;
   MemoryManager& operator=(const MemoryManager&) = delete;
   MemoryManager(MemoryManager&&) = delete;
@@ -30,7 +29,7 @@ public:
   // ---------------------------------------------------------------------------
   void init(std::size_t totalSize = 256 * 1024 * 1024) // Default 256 MB
   {
-    mainArena_ = std::make_unique<SystemArena>(totalSize);
+    mainArena_.emplace(totalSize);
 
     // Allocator proportions of the arena allocator
     constexpr std::size_t PERSISTENT_PCT = 15;
@@ -42,27 +41,27 @@ public:
     std::size_t scratchSize = (totalSize * SCRATCH_PCT) / 100; 
     std::size_t poolSize  = totalSize - (persistentSize + frameSize + scratchSize);
 
-    persistent_allocator_ = std::make_unique<LinearAllocator>(mainArena_->push_memory(persistentSize), persistentSize);
-    frame_allocator_ = std::make_unique<LinearAllocator>(mainArena_->push_memory(frameSize), frameSize);
-    scratch_allocator_ = std::make_unique<LinearAllocator>(mainArena_->push_memory(scratchSize), scratchSize);
-    pool_allocator_ = std::make_unique<PoolAllocator>(mainArena_->push_memory(poolSize), poolSize, 64);
+    persistent_allocator_.emplace(mainArena_->push_memory(persistentSize), persistentSize);
+    frame_allocator_.emplace(mainArena_->push_memory(frameSize), frameSize);
+    scratch_allocator_.emplace(mainArena_->push_memory(scratchSize), scratchSize);
+    pool_allocator_.emplace(mainArena_->push_memory(poolSize), poolSize, 64);
   }
 
-  [[nodiscard]] LinearAllocator& getPersistantAllocator() const noexcept { return *persistent_allocator_; }
+  [[nodiscard]] LinearAllocator& getPersistantAllocator() noexcept { return *persistent_allocator_; }
   void clearPersistantAllocator() { persistent_allocator_->clear(); }
 
-  [[nodiscard]] LinearAllocator& getFrameAllocator() const noexcept { return *frame_allocator_; }
+  [[nodiscard]] LinearAllocator& getFrameAllocator() noexcept { return *frame_allocator_; }
   void clearFrameAllocator() { frame_allocator_->clear(); }
 
-  [[nodiscard]] LinearAllocator& getScratchAllocator() const noexcept { return *scratch_allocator_; }
+  [[nodiscard]] LinearAllocator& getScratchAllocator() noexcept { return *scratch_allocator_; }
   void clearScratchAllocator() { scratch_allocator_->clear(); }
 
-  [[nodiscard]] PoolAllocator& getPoolAllocator() const noexcept { return *pool_allocator_; }
+  [[nodiscard]] PoolAllocator& getPoolAllocator() noexcept { return *pool_allocator_; }
 private:
-  std::unique_ptr<SystemArena> mainArena_;
-  std::unique_ptr<LinearAllocator> persistent_allocator_;
-  std::unique_ptr<LinearAllocator> frame_allocator_;
-  std::unique_ptr<LinearAllocator> scratch_allocator_;
-  std::unique_ptr<PoolAllocator> pool_allocator_;
+  std::optional<SystemArena> mainArena_;
+  std::optional<LinearAllocator> persistent_allocator_;
+  std::optional<LinearAllocator> frame_allocator_;
+  std::optional<LinearAllocator> scratch_allocator_;
+  std::optional<PoolAllocator> pool_allocator_;
 };
 } // namespace Engine::Memory
