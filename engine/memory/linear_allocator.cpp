@@ -15,7 +15,8 @@ LinearAllocator::LinearAllocator (void* ptr, size_t max_size) :
   assert(max_size > 0 && "Allocator must allocate a non-zero size.");
 }
 
-[[nodiscard]] void* LinearAllocator::allocate(size_t size, size_t alignment) noexcept
+
+[[nodiscard]] void* LinearAllocator::allocate(size_t size, size_t alignment)
 {
   assert(size > 0 && "Size must be greater than zero.");
   assert((alignment > 0 && (alignment & (alignment - 1)) == 0) && "Alignment must be a power of two.");

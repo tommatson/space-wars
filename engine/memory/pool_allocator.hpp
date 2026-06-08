@@ -10,11 +10,11 @@ public:
   // Leaders
   // ---------------------------------------------------------------------------
   PoolAllocator(void* ptr, std::size_t max_size, std::size_t chunk_size) noexcept;
+  ~PoolAllocator() = default;
 
   // ---------------------------------------------------------------------------
   // Delete Semantics
   // ---------------------------------------------------------------------------
-  ~PoolAllocator() = delete;
   PoolAllocator(const PoolAllocator&) = delete;
   PoolAllocator& operator= (const PoolAllocator&) = delete;
   PoolAllocator(const PoolAllocator&&) = delete;

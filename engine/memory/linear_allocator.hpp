@@ -10,11 +10,11 @@ public:
   // Leaders
   // ---------------------------------------------------------------------------
   LinearAllocator(void* ptr, std::size_t max_size);
+  ~LinearAllocator() = default;
 
   // ---------------------------------------------------------------------------
   // Deleted Semantics
   // ---------------------------------------------------------------------------
-  ~LinearAllocator() = delete;
   LinearAllocator(const LinearAllocator&) = delete;
   LinearAllocator& operator=(const LinearAllocator&) = delete;
   LinearAllocator(LinearAllocator&&) = delete;
@@ -23,7 +23,7 @@ public:
   // ---------------------------------------------------------------------------
   // Core API
   // ---------------------------------------------------------------------------
-  [[nodiscard]] void* allocate(std::size_t size, std::size_t alignment) noexcept;
+  [[nodiscard]] void* allocate(std::size_t size, std::size_t alignment);
 
   void clear() noexcept;
 
