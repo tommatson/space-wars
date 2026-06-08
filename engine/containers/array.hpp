@@ -23,10 +23,7 @@ public:
   }
   ~Array()
   {
-    for(std::size_t i = 0; i < size_; ++i)
-    {
-      front_ptr_[i].~T();
-    }
+    clear();
     
     allocator_.deallocate(reinterpret_cast<void*>(front_ptr_), capacity_ * sizeof(T));
   };
@@ -67,6 +64,16 @@ public:
     assert(i < size_ && "Index out of range.");
     return front_ptr_[i];
 
+  }
+
+  void clear() 
+  {
+    for(std::size_t i = 0; i < size_; ++i)
+    {
+      front_ptr_[i].~T();
+    }
+
+    size_ = 0;
   }
 
   T* data() noexcept { return front_ptr_; }

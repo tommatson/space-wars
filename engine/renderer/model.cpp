@@ -1,6 +1,7 @@
 #include "model.hpp"
-
 #include "utils.hpp"
+
+#include "engine/containers/array.hpp"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
@@ -45,7 +46,8 @@ std::unique_ptr<Model> Model::createModelFromFile(Device& device, const std::str
 
 }
 
-void Model::createVertexBuffers(const std::vector<Vertex> &vertices){
+template<typename Allocator>
+void Model::createVertexBuffers(const Engine::Containers::Array<Vertex, Allocator> &vertices){
 
   vertexCount = static_cast<uint32_t>(vertices.size());
   assert(vertexCount >= 3 && "Vertex count must be at least 3");
@@ -74,7 +76,8 @@ void Model::createVertexBuffers(const std::vector<Vertex> &vertices){
 
 }
 
-void Model::createIndexBuffers(const std::vector<uint32_t>& indices){
+template<typename Allocator>
+void Model::createIndexBuffers(const Engine::Containers::Array<uint32_t, Allocator>& indices){
 
   indexCount = static_cast<uint32_t>(indices.size());
   hasIndexBuffer = indexCount > 0;
