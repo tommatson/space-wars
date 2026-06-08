@@ -17,20 +17,29 @@ public:
   Array(A& allocator) :
   size_(0),
   capacity_(0),
-  allocator_(allocator)
+  allocator_(allocator),
+  front_ptr_(nullptr)
   {
   }
-  ~Array();
+  ~Array()
+  {
+    for(std::size_t i = 0; i < size_; ++i)
+    {
+      front_ptr_[i].~T();
+    }
+    
+    allocator_.deallocate(reinterpret_cast<void*>(front_ptr_), capacity_ * sizeof(T));
+  };
 
   // ---------------------------------------------------------------------------
   // Core API
   // ---------------------------------------------------------------------------
-  std::size_t size() noexcept 
+  std::size_t size() const noexcept 
   {
     return size_;
   }
   
-  std::size_t capacity() noexcept 
+  std::size_t capacity() const noexcept 
   {
     return capacity_;
   }
@@ -38,9 +47,9 @@ public:
   void push_back(T data) 
   {
     // Check capacity
-    if (size_ + 1 == capacity_ ) [[unlikely]] reserve(capacity_ ? capacity_ * 2 : 8);
+    if (size_ + 1 >= capacity_ ) [[unlikely]] reserve(capacity_ ? capacity_ * 2 : 8);
 
-    new (front_ptr_ + size_) T(std::forward(data));
+    new (front_ptr_ + size_) T(std::move(data));
 
     ++size_;
   }
@@ -53,12 +62,21 @@ public:
   };
 
 
-  T& operator[](std::size_t i) 
+  const T& operator[](std::size_t i) const
   {
     assert(i < size_ && "Index out of range.");
     return front_ptr_[i];
 
   }
+
+  T* data() noexcept { return front_ptr_; }
+  const T* data() const noexcept { return front_ptr_; }
+
+  T* begin() noexcept { return front_ptr_; }
+  const T* begin() const noexcept { return front_ptr_; }
+
+  T* end() noexcept { return front_ptr_ + size_; }
+  const T* end() const noexcept { return front_ptr_ + size_; }
 
 private:
   std::size_t size_;
@@ -67,8 +85,6 @@ private:
   A& allocator_;
   
   T* front_ptr_;
-
-  void* memory_segment_;
 
   void reserve(std::size_t new_capacity)
   {
