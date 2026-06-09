@@ -1,30 +1,64 @@
 #include "memory_overrides.hpp"
 
-#include <cstddef>
-#include <cassert>
 #include <new>
+#include <cstdlib>
+#include <cstdio>
 
-void* operator new(std::size_t)
-{
-  assert(false && "Standard allocations are strictly forbidden!");
-  throw std::bad_alloc();
+namespace {
+  bool external_scope = false;
 }
 
-void* operator new[](std::size_t)
+ExternalAllocationScope::ExternalAllocationScope()
 {
-  assert(false && "Standard array allocations are strictly forbidden!");
-  throw std::bad_alloc();
+  external_scope = true; 
+}
+
+ExternalAllocationScope::~ExternalAllocationScope()
+{
+  external_scope = false; 
+}
+
+namespace {
+struct Stats {
+  std::size_t internal_allocations = 0; 
+  std::size_t external_allocations = 0; 
+} stats;
+}
+
+void* operator new(std::size_t size) 
+{
+  if (external_scope) stats.external_allocations++;
+  else stats.internal_allocations++;
+  return std::malloc(size);
+}
+
+void* operator new[](std::size_t size)
+{
+  if (external_scope) stats.external_allocations++;
+  else stats.internal_allocations++;
+  return std::malloc(size);
 }
 
 void operator delete(void* ptr) noexcept
 {
-  assert(false && "Standard deletions are stricly forbidden!");
-  __builtin_unreachable();
+  if (external_scope) stats.external_allocations++;
+  else stats.internal_allocations++;
+  std::free(ptr);
 }
 
 void operator delete[](void* ptr) noexcept  
 {
-  assert(false && "Standard array deletions are strictly forbidden!");
-  __builtin_unreachable();
+  if (external_scope) stats.external_allocations++;
+  else stats.internal_allocations++;
+  std::free(ptr);
 }
 
+void MemoryTracker::report()
+{
+  std::printf("=== Allocation Report ===\n");
+  std::printf("External : %zu\n", stats.external_allocations);
+  std::printf("Internal : %zu\n", stats.internal_allocations);
+  if (stats.internal_allocations > 0)
+      std::printf("WARNING: %zu internal allocation(s) detected!\n", stats.internal_allocations);
+  std::printf("=========================\n");
+}
