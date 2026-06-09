@@ -1,7 +1,7 @@
 include .env
 
 CXX = g++
-CXXFLAGS = -std=c++23 -I. -I$(VULKAN_SDK_PATH)/include -I$(STB_INCLUDE_PATH) -I$(TINYOBJ_INCLUDE_PATH) -include engine/memory/memory_overrides.hpp
+CXXFLAGS = -std=c++23 -I. -I$(VULKAN_SDK_PATH)/include -I$(STB_INCLUDE_PATH) -I$(TINYOBJ_INCLUDE_PATH) -I$(IMGUI_DIR) -include engine/memory/memory_overrides.hpp
 LDFLAGS = -L$(VULKAN_SDK_PATH)/lib -Wl,-rpath,$(VULKAN_SDK_PATH)/lib `pkg-config --static --libs glfw3` -lvulkan
 
 ENGINE_DIR = engine
@@ -15,6 +15,7 @@ CORE_DIR = $(ENGINE_DIR)/core
 IMGUI_DIR = $(ENGINE_DIR)/imgui
 GAME_SRC_DIR = game/src
 GAME_SCENES_DIR = game/scenes
+GAME_DIR = $(GAME_SRC_DIR)
 BUILD_DIR = build
 RENDERER_BUILD_DIR = $(BUILD_DIR)/engine/renderer
 SYSTEMS_BUILD_DIR = $(BUILD_DIR)/engine/renderer/systems
@@ -26,6 +27,7 @@ CORE_BUILD_DIR = $(BUILD_DIR)/engine/core
 IMGUI_BUILD_DIR = $(BUILD_DIR)/engine/imgui
 GAME_SRC_BUILD_DIR = $(BUILD_DIR)/game/src
 GAME_SCENES_BUILD_DIR = $(BUILD_DIR)/game/scenes
+GAME_BUILD_DIR = $(GAME_SRC_BUILD_DIR)
 TARGET = $(BUILD_DIR)/space-wars
 
 MEMORY_SRCS = $(wildcard $(MEMORY_DIR)/*.cpp)
@@ -44,7 +46,10 @@ RENDERER_OBJS = $(RENDERER_SRCS:$(RENDERER_DIR)/%.cpp=$(RENDERER_BUILD_DIR)/%.o)
 SYSTEMS_OBJS = $(SYSTEMS_SRCS:$(SYSTEMS_DIR)/%.cpp=$(SYSTEMS_BUILD_DIR)/%.o)
 NETWORK_OBJS = $(NETWORK_SRCS:$(NETWORK_DIR)/%.cpp=$(NETWORK_BUILD_DIR)/%.o)
 SOCKETS_OBJS = $(SOCKETS_SRCS:$(SOCKETS_DIR)/%.cpp=$(SOCKETS_BUILD_DIR)/%.o)
-OBJS = $(MEMORY_OBJS) $(GAME_OBJS) $(RENDERER_OBJS) $(SYSTEMS_OBJS) $(NETWORK_OBJS) $(SOCKETS_OBJS)
+SCENE_OBJS = $(SCENE_SRCS:$(SCENE_DIR)/%.cpp=$(SCENE_BUILD_DIR)/%.o)
+CORE_OBJS = $(CORE_SRCS:$(CORE_DIR)/%.cpp=$(CORE_BUILD_DIR)/%.o)
+IMGUI_OBJS = $(IMGUI_SRCS:$(IMGUI_DIR)/%.cpp=$(IMGUI_BUILD_DIR)/%.o)
+OBJS = $(MEMORY_OBJS) $(GAME_OBJS) $(RENDERER_OBJS) $(SYSTEMS_OBJS) $(NETWORK_OBJS) $(SOCKETS_OBJS) $(SCENE_OBJS) $(CORE_OBJS) $(IMGUI_OBJS)
 
 VERT_SRCS = $(wildcard shaders/*.vert)
 FRAG_SRCS = $(wildcard shaders/*.frag)
@@ -92,7 +97,7 @@ $(IMGUI_BUILD_DIR)/%.o: $(IMGUI_DIR)/%.cpp | dirs
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 dirs:
-	mkdir -p $(BUILD_DIR) $(MEMORY_BUILD_DIR) $(RENDERER_BUILD_DIR) $(SYSTEMS_BUILD_DIR) $(NETWORK_BUILD_DIR) $(SOCKETS_BUILD_DIR) $(GAME_BUILD_DIR)
+	mkdir -p $(BUILD_DIR) $(MEMORY_BUILD_DIR) $(RENDERER_BUILD_DIR) $(SYSTEMS_BUILD_DIR) $(NETWORK_BUILD_DIR) $(SOCKETS_BUILD_DIR) $(GAME_BUILD_DIR) $(SCENE_BUILD_DIR) $(CORE_BUILD_DIR) $(IMGUI_BUILD_DIR)
 
 clean:
 	rm -rf $(BUILD_DIR)

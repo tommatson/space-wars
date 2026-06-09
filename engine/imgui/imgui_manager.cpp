@@ -9,6 +9,7 @@
 namespace Engine {
 
 void ImGuiManager::init(Renderer::Window& window, Renderer::Device& device, VkRenderPass renderPass, uint32_t imageCount) {
+  ExternalAllocationScope scope;
   // Create a dedicated descriptor pool for ImGui
   VkDescriptorPoolSize poolSizes[] = {
     { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1 },
@@ -58,6 +59,7 @@ void ImGuiManager::init(Renderer::Window& window, Renderer::Device& device, VkRe
 }
 
 void ImGuiManager::newFrame() {
+  ExternalAllocationScope scope;
   if (!initialized) return;
   ImGui_ImplVulkan_NewFrame();
   ImGui_ImplGlfw_NewFrame();
@@ -65,12 +67,14 @@ void ImGuiManager::newFrame() {
 }
 
 void ImGuiManager::render(VkCommandBuffer commandBuffer) {
+  ExternalAllocationScope scope;
   if (!initialized) return;
   ImGui::Render();
   ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
 }
 
 void ImGuiManager::shutdown() {
+  ExternalAllocationScope scope;
   if (!initialized) return;
   ImGui_ImplVulkan_Shutdown();
   ImGui_ImplGlfw_Shutdown();

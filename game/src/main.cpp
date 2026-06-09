@@ -45,6 +45,6 @@ int main(){
     return EXIT_FAILURE;
   }
 
-
+  MemoryTracker::report();
   return EXIT_SUCCESS;
 }

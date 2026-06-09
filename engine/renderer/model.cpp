@@ -46,8 +46,8 @@ std::unique_ptr<Model> Model::createModelFromFile(Device& device, const std::str
 
 }
 
-template<typename Allocator>
-void Model::createVertexBuffers(const Engine::Containers::Array<Vertex, Allocator> &vertices){
+template<typename Container>
+void Model::createVertexBuffers(const Container &vertices){
 
   vertexCount = static_cast<uint32_t>(vertices.size());
   assert(vertexCount >= 3 && "Vertex count must be at least 3");
@@ -76,8 +76,8 @@ void Model::createVertexBuffers(const Engine::Containers::Array<Vertex, Allocato
 
 }
 
-template<typename Allocator>
-void Model::createIndexBuffers(const Engine::Containers::Array<uint32_t, Allocator>& indices){
+template<typename Container>
+void Model::createIndexBuffers(const Container& indices){
 
   indexCount = static_cast<uint32_t>(indices.size());
   hasIndexBuffer = indexCount > 0;
@@ -158,6 +158,7 @@ std::vector<VkVertexInputAttributeDescription> Model::Vertex::getAttributeDescri
 
 
 void Model::Builder::loadModel(const std::string& filepath){
+  ExternalAllocationScope scope;
   tinyobj::attrib_t attrib;
   std::vector<tinyobj::shape_t> shapes;
   std::vector<tinyobj::material_t> materials;

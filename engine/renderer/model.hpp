@@ -54,11 +54,11 @@ public:
 
 private:
 
-  template<typename Allocator>
-  void createVertexBuffers(const Engine::Containers::Array<Vertex, Allocator>& verticies);
+  template<typename Container>
+  void createVertexBuffers(const Container& vertices);
 
-  template<typename Allocator>
-  void createIndexBuffers(const Engine::Containers::Array<uint32_t, Allocator>& indices);
+  template<typename Container>
+  void createIndexBuffers(const Container& indices);
 
 
   Device& device;
