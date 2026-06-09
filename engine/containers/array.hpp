@@ -104,7 +104,10 @@ private:
       new (new_data + i) T(std::move(front_ptr_[i])); 
     }
 
-    allocator_.deallocate(reinterpret_cast<void*>(front_ptr_), capacity_ * sizeof(T));
+    if constexpr (requires { allocator_.deallocate(reinterpret_cast<void*>(front_ptr_), capacity_ * sizeof(T)); }) 
+    {
+      allocator_.deallocate(reinterpret_cast<void*>(front_ptr_), capacity_ * sizeof(T));
+    }
 
     front_ptr_ = new_data;
     capacity_ = new_capacity;
