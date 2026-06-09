@@ -4,7 +4,7 @@
 #include "../../engine/scene/scene_manager.hpp"
 #include "gameplay.hpp"
 
-#include "imgui.h"
+#include "../../extern/imgui/imgui.h"
 
 #include <memory>
 
