@@ -4,7 +4,7 @@
 #include "engine/containers/array.hpp"
 
 #define TINYOBJLOADER_IMPLEMENTATION
-#include "tiny_obj_loader.h"
+#include "extern/tiny_obj_loader.h"
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
 

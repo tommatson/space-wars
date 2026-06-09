@@ -6,7 +6,7 @@
 #include "../renderer/renderer.hpp"
 #include "../renderer/descriptors.hpp"
 #include "../renderer/game_object.hpp"
-#include "../imgui/imgui_manager.hpp"
+#include "../../extern/imgui/imgui_manager.hpp"
 
 #include "../scene/scene_manager.hpp"
 #include "../scene/scene.hpp"
