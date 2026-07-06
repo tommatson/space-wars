@@ -25,15 +25,19 @@ public:
   // ---------------------------------------------------------------------------
   [[nodiscard]] void* allocate(std::size_t size, std::size_t alignment) noexcept;
   void deallocate(void* ptr, std::size_t bytes) noexcept;
-  
-
 
 private:
   // Immutables
   const std::size_t max_size_;
 
+  struct FreeBlock 
+  {
+    std::size_t size;
+    FreeBlock* next;
+  };
+
   // Mutables
-  std::byte* free_list_head_;
+  FreeBlock* free_block_head_;
 
 };
 
