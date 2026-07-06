@@ -3,26 +3,18 @@
 #include <cstddef>
 #include <cstdint>
 #include <cassert>
-#include <algorithm>
+#include <memory>
 
 namespace Engine::Memory {
 
-struct AllocationHeader 
-{
-  std::size_t size;     // Total size of the block allocated (including padding)
-  std::size_t padding;  // Padding from block_start to payload_start
-};
-
 // Helper function to calculate padding
-inline std::size_t calculate_padding(std::uintptr_t block_start, std::size_t alignment) noexcept 
+void FreeListAllocator::calculate_padding(FreeBlock* block, const std::size_t alignment, const std::size_t size) noexcept 
 {
-  const std::size_t header_size = sizeof(AllocationHeader);
-  const std::size_t required_alignment = std::max(alignment, alignof(AllocationHeader));
+  void* current_ptr = reinterpret_cast<void*>(block->free_block_start);
   
-  std::uintptr_t raw_payload = block_start + header_size;
-  std::uintptr_t aligned_payload = (raw_payload + (required_alignment - 1)) & ~(required_alignment - 1);
-  
-  return aligned_payload - block_start;
+  void* aligned_ptr = std::align(alignment, size, current_ptr, block->size);
+
+  if (aligned_ptr != nullptr) block->data_start = reinterpret_cast<std::byte*>(aligned_ptr);
 }
 
 FreeListAllocator::FreeListAllocator(void* ptr, std::size_t max_size) noexcept : 

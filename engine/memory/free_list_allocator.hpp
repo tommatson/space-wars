@@ -33,11 +33,16 @@ private:
   struct FreeBlock 
   {
     std::size_t size;
+    std::byte* data_start; // free_block_start_ + padding
+    std::byte* free_block_start;
     FreeBlock* next;
   };
 
   // Mutables
   FreeBlock* free_block_head_;
+
+
+  void calculate_padding(FreeBlock* block, const std::size_t alignment, const std::size_t size) noexcept;
 
 };
 
