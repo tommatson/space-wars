@@ -8,16 +8,22 @@
 
 namespace Engine::Memory {
 
-// Helper function to calculate padding
-std::size_t FreeListAllocator::calculate_padding(FreeBlock* block, const std::size_t alignment, const std::size_t size) noexcept 
+// Helper function to check if the object will fit
+bool FreeListAllocator::try_allocate(FreeBlock* block, const std::size_t alignment, const std::size_t size) noexcept 
 {
   void* current_ptr = reinterpret_cast<void*>(reinterpret_cast<std::byte*>(block) + sizeof(FreeBlock));  
 
   void* aligned_ptr = std::align(std::max(alignment, alignof(FreeBlock)), size, current_ptr, block->size);
 
-  if (aligned_ptr != nullptr) block->data_start = reinterpret_cast<std::byte*>(aligned_ptr);
+  if (aligned_ptr != nullptr) 
+  {
+    // Data fits
+    block->data_start = reinterpret_cast<std::byte*>(aligned_ptr);
+    block->size -= size;
+    return true;
+  }
 
-  return block->data_start - reinterpret_cast<std::byte*>(block); 
+  return false;
 }
 
 FreeListAllocator::FreeListAllocator(void* ptr, std::size_t max_size) noexcept : 
@@ -29,6 +35,7 @@ FreeListAllocator::FreeListAllocator(void* ptr, std::size_t max_size) noexcept :
 
   FreeBlock* initial_block = reinterpret_cast<FreeBlock*>(ptr);
   initial_block->size = max_size;
+  initial_block->max_size = max_size;
   initial_block->next = nullptr;
   initial_block->data_start = nullptr;
 }
@@ -45,16 +52,16 @@ FreeListAllocator::FreeListAllocator(void* ptr, std::size_t max_size) noexcept :
 
   FreeBlock* best_prev = nullptr;
   FreeBlock* best_curr = nullptr;
-  std::size_t best_padding = 0;
+
 
   // First fit
   while (curr != nullptr) 
   {
-    std::size_t padding = calculate_padding(curr, alignment, size);
-    if (curr->size >= padding + size) {
+    bool allocator_fits = try_allocate(curr, alignment, size);
+    if (allocator_fits) 
+    {
       best_prev = prev;
       best_curr = curr;
-      best_padding = padding;
       break;
     }
     prev = curr;
@@ -65,25 +72,37 @@ FreeListAllocator::FreeListAllocator(void* ptr, std::size_t max_size) noexcept :
   if (best_curr == nullptr) [[unlikely]] return nullptr;
 
   std::size_t block_size = best_curr->size;
-  std::size_t remaining_size = block_size - (best_padding + size);
+  std::size_t block_max_size = best_curr->max_size;
+  std::byte* block_data_start = best_curr->data_start;
 
-  if (remaining_size >= sizeof(FreeBlock)) {
+  if (block_size >= sizeof(FreeBlock)) 
+  {
     // Split the block
-    FreeBlock* next_free_block = reinterpret_cast<FreeBlock*>(
-        reinterpret_cast<std::byte*>(best_curr) + best_padding + size);
-    next_free_block->size = remaining_size;
+    FreeBlock* next_free_block = reinterpret_cast<FreeBlock*>(block_data_start + size);
+
+    next_free_block->size = block_max_size - block_size;
     next_free_block->next = best_curr->next;
 
-    if (best_prev == nullptr) {
-      free_block_head_ = reinterpret_cast<std::byte*>(next_free_block);
-    } else {
+    best_curr->max_size = size;
+
+    if (best_prev == nullptr) 
+    {
+      free_block_head_ = next_free_block;
+    } 
+    else 
+    {
       best_prev->next = next_free_block;
     }
-  } else {
+  } 
+  else 
+  {
     // Do not split, consume the entire block
-    if (best_prev == nullptr) {
-      free_block_head_ = reinterpret_cast<std::byte*>(best_curr->next);
-    } else {
+    if (best_prev == nullptr) 
+    {
+      free_block_head_ = best_curr->next;
+    } 
+    else 
+    {
       best_prev->next = best_curr->next;
     }
   }

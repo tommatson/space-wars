@@ -33,6 +33,7 @@ private:
   struct FreeBlock 
   {
     std::size_t size;
+    std::size_t max_size;
     std::byte* data_start; // free_block_start_ + padding
     FreeBlock* next;
   };
@@ -41,7 +42,7 @@ private:
   FreeBlock* free_block_head_;
 
 
-  std::size_t calculate_padding(FreeBlock* block, const std::size_t alignment, const std::size_t size) noexcept;
+  bool try_allocate(FreeBlock* block, const std::size_t alignment, const std::size_t size) noexcept;
 
 };
 
