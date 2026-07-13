@@ -4,17 +4,20 @@
 #include <cstdint>
 #include <cassert>
 #include <memory>
+#include <algorithm>
 
 namespace Engine::Memory {
 
 // Helper function to calculate padding
-void FreeListAllocator::calculate_padding(FreeBlock* block, const std::size_t alignment, const std::size_t size) noexcept 
+std::size_t FreeListAllocator::calculate_padding(FreeBlock* block, const std::size_t alignment, const std::size_t size) noexcept 
 {
-  void* current_ptr = reinterpret_cast<void*>(block->free_block_start);
-  
-  void* aligned_ptr = std::align(alignment, size, current_ptr, block->size);
+  void* current_ptr = reinterpret_cast<void*>(reinterpret_cast<std::byte*>(block) + sizeof(FreeBlock));  
+
+  void* aligned_ptr = std::align(std::max(alignment, alignof(FreeBlock)), size, current_ptr, block->size);
 
   if (aligned_ptr != nullptr) block->data_start = reinterpret_cast<std::byte*>(aligned_ptr);
+
+  return block->data_start - reinterpret_cast<std::byte*>(block); 
 }
 
 FreeListAllocator::FreeListAllocator(void* ptr, std::size_t max_size) noexcept : 
@@ -27,6 +30,7 @@ FreeListAllocator::FreeListAllocator(void* ptr, std::size_t max_size) noexcept :
   FreeBlock* initial_block = reinterpret_cast<FreeBlock*>(ptr);
   initial_block->size = max_size;
   initial_block->next = nullptr;
+  initial_block->data_start = nullptr;
 }
 
 [[nodiscard]] void* FreeListAllocator::allocate(std::size_t size, std::size_t alignment) noexcept
@@ -46,7 +50,7 @@ FreeListAllocator::FreeListAllocator(void* ptr, std::size_t max_size) noexcept :
   // First fit
   while (curr != nullptr) 
   {
-    std::size_t padding = calculate_padding(reinterpret_cast<std::uintptr_t>(curr), alignment);
+    std::size_t padding = calculate_padding(curr, alignment, size);
     if (curr->size >= padding + size) {
       best_prev = prev;
       best_curr = curr;
