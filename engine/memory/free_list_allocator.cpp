@@ -12,9 +12,7 @@ namespace Engine::Memory {
 std::byte* FreeListAllocator::try_allocate(
   FreeBlock* block,
   const std::size_t alignment,
-  const std::size_t size,
-  std::byte*& data_start,
-  std::size_t& block_size) noexcept
+  const std::size_t size ) noexcept
 {
   if (block->size < sizeof(AllocationHeader) + size) return nullptr;
 
@@ -27,11 +25,11 @@ std::byte* FreeListAllocator::try_allocate(
 
   if (aligned_ptr == nullptr) return nullptr;
 
-  data_start = reinterpret_cast<std::byte*>(aligned_ptr);
+  std::byte* data_start = reinterpret_cast<std::byte*>(aligned_ptr);
 
   // Place the allocation header directly before the data starts
   AllocationHeader* allocation_header = reinterpret_cast<AllocationHeader*>(data_start) - 1;
-  allocation_header->block_size = block_size;
+  allocation_header->block_size = block->size;
   allocation_header->padding = static_cast<std::size_t>(reinterpret_cast<std::byte*>(allocation_header) - free_block_start);
 
   return data_start;
@@ -90,12 +88,23 @@ FreeListAllocator::FreeListAllocator(void* ptr, std::size_t max_size) noexcept :
   // First fit
   while (curr != nullptr) 
   {
-    std::byte* free_block_start = reinterpret_cast<std::byte*>(curr);
-    std::size_t free_block_size = curr->size;
-    FreeBlock* next = curr->next;
+    std::byte* free_block = reinterpret_cast<std::byte*>(curr);
 
-    std::byte* data_start = nullptr;
-    std::size_t block_size = 0;
+    std::size_t free_block_size = curr->size;
+    FreeBlock* free_block_next = curr->next;
+
+    std::byte* data_start = try_allocate(curr, alignment, size);
+    AllocationHeader* allocation_header = reinterpret_cast<AllocationHeader*>(data_start) - 1;
+
+    // Allocation suceeded
+    if (data_start) 
+    {
+      // We need to sort out sizes and make space for the next FreeBlock
+      free_block->size = 
+      
+
+
+    }
 
     if (try_allocate(curr, alignment, size, data_start, block_size))
     {

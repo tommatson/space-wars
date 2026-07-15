@@ -48,9 +48,8 @@ private:
   std::byte* try_allocate(
     FreeBlock* block,
     std::size_t alignment,
-    std::size_t size,
-    std::byte*& data_start,
-    std::size_t& block_size) noexcept;
+    std::size_t size
+   ) noexcept;
 };
 
 } // namespace Engine::Memory
