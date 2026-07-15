@@ -15,15 +15,14 @@ bool FreeListAllocator::try_allocate(FreeBlock* block, const std::size_t alignme
 
   void* aligned_ptr = std::align(std::max(alignment, alignof(FreeBlock)), size, current_ptr, block->size);
 
-  if (aligned_ptr != nullptr) 
-  {
-    // Data fits
-    block->data_start = reinterpret_cast<std::byte*>(aligned_ptr);
-    block->size -= size;
-    return true;
-  }
+  if (aligned_ptr == nullptr) return false; 
 
-  return false;
+  // Data fits
+  block->data_start = reinterpret_cast<std::byte*>(aligned_ptr);
+  block->size -= size;
+
+  return true;
+
 }
 
 FreeListAllocator::FreeListAllocator(void* ptr, std::size_t max_size) noexcept : 
@@ -52,7 +51,6 @@ FreeListAllocator::FreeListAllocator(void* ptr, std::size_t max_size) noexcept :
 
   FreeBlock* best_prev = nullptr;
   FreeBlock* best_curr = nullptr;
-
 
   // First fit
   while (curr != nullptr) 
@@ -107,58 +105,60 @@ FreeListAllocator::FreeListAllocator(void* ptr, std::size_t max_size) noexcept :
     }
   }
 
-  std::byte* payload_start = reinterpret_cast<std::byte*>(best_curr) + best_padding;
-  AllocationHeader* header = reinterpret_cast<AllocationHeader*>(payload_start - sizeof(AllocationHeader));
-  header->padding = best_padding;
-  header->size = (remaining_size >= sizeof(FreeBlock)) ? (best_padding + size) : block_size;
-
-  return static_cast<void*>(payload_start);
+  return reinterpret_cast<void*>(best_curr->data_start);
 }
+
 
 void FreeListAllocator::deallocate(void* ptr, std::size_t bytes) noexcept 
 {
   assert(ptr != nullptr && "Free list allocator cannot deallocate a nullptr.");
 
   std::byte* payload_start = static_cast<std::byte*>(ptr);
-  AllocationHeader* header = reinterpret_cast<AllocationHeader*>(payload_start - sizeof(AllocationHeader));
 
-  std::byte* block_start = payload_start - header->padding;
-  std::size_t block_size = header->size;
+  // The header pointer was stashed immediately before the payload at
+  // allocation time (see try_allocate), so this recovers the real header
+  // regardless of how much alignment padding was inserted.
+  FreeBlock* freed_block = reinterpret_cast<FreeBlock**>(payload_start)[-1];
 
-  FreeBlock* freed_block = reinterpret_cast<FreeBlock*>(block_start);
-  std::size_t freed_size = block_size;
+  assert(freed_block->data_start == payload_start &&
+         "Pointer does not match a live allocation from this allocator.");
+  assert(freed_block->max_size == bytes &&
+         "Deallocation size does not match the recorded allocation size.");
 
-  // Insert freed_block in address-sorted order
+  std::byte* block_start = reinterpret_cast<std::byte*>(freed_block);
+  std::size_t freed_size = freed_block->size;
+
+  // Find insertion point: first free block at or after freed_block's address.
   FreeBlock* prev = nullptr;
-  FreeBlock* curr = reinterpret_cast<FreeBlock*>(free_block_head_);
-
-  while (curr != nullptr && reinterpret_cast<std::uintptr_t>(curr) < reinterpret_cast<std::uintptr_t>(freed_block)) {
+  FreeBlock* curr = free_block_head_;
+  while (curr != nullptr && reinterpret_cast<std::byte*>(curr) < block_start) 
+  {
     prev = curr;
     curr = curr->next;
   }
 
-  FreeBlock* merged_prev = nullptr;
-
-  // Try to merge with prev
-  if (prev != nullptr && reinterpret_cast<std::byte*>(prev) + prev->size == block_start) {
+  // Merge with prev, if adjacent.
+  if (prev != nullptr && reinterpret_cast<std::byte*>(prev) + prev->size == block_start) 
+  {
     prev->size += freed_size;
-    merged_prev = prev;
-  } else {
-    if (prev == nullptr) {
-      free_block_head_ = reinterpret_cast<std::byte*>(freed_block);
-    } else {
-      prev->next = freed_block;
-    }
+    freed_block = prev;
+  } 
+  else 
+  {
     freed_block->size = freed_size;
     freed_block->next = curr;
-    merged_prev = freed_block;
+    if (prev == nullptr) free_block_head_ = freed_block;
+    else prev->next = freed_block;
   }
 
-  // Try to merge with curr
-  if (curr != nullptr && reinterpret_cast<std::byte*>(merged_prev) + merged_prev->size == reinterpret_cast<std::byte*>(curr)) {
-    merged_prev->size += curr->size;
-    merged_prev->next = curr->next;
+  // Merge with curr, if adjacent.
+  if (curr != nullptr &&
+      reinterpret_cast<std::byte*>(freed_block) + freed_block->size == reinterpret_cast<std::byte*>(curr)) 
+  {
+    freed_block->size += curr->size;
+    freed_block->next = curr->next;
   }
 }
+
 
 } // namespace Engine::Memory
