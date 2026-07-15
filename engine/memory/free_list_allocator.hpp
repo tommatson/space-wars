@@ -30,19 +30,19 @@ private:
   // Immutables
   const std::size_t max_size_;
 
-  struct FreeBlock 
+  struct AllocationHeader 
   {
     std::size_t size;
     std::size_t max_size;
     std::byte* data_start; // free_block_start_ + padding
-    FreeBlock* next;
+    AllocationHeader* next;
   };
 
   // Mutables
-  FreeBlock* free_block_head_;
+  AllocationHeader* free_block_head_;
 
 
-  bool try_allocate(FreeBlock* block, const std::size_t alignment, const std::size_t size) noexcept;
+  bool try_allocate(AllocationHeader* block, const std::size_t alignment, const std::size_t size) noexcept;
 
 };
 
