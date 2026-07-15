@@ -30,20 +30,27 @@ private:
   // Immutables
   const std::size_t max_size_;
 
-  struct AllocationHeader 
+  struct FreeBlock
   {
-    std::size_t size;
-    std::size_t max_size;
-    std::byte* data_start; // free_block_start_ + padding
-    AllocationHeader* next;
+    std::size_t size; // current size
+    FreeBlock* next;
+  };
+
+  struct AllocationHeader
+  {
+    std::size_t block_size; // max size of this block
+    std::size_t padding;
   };
 
   // Mutables
-  AllocationHeader* free_block_head_;
+  FreeBlock* free_block_head_;
 
-
-  bool try_allocate(AllocationHeader* block, const std::size_t alignment, const std::size_t size) noexcept;
-
+  std::byte* try_allocate(
+    FreeBlock* block,
+    std::size_t alignment,
+    std::size_t size,
+    std::byte*& data_start,
+    std::size_t& block_size) noexcept;
 };
 
 } // namespace Engine::Memory

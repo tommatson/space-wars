@@ -1,157 +1,171 @@
 #include "free_list_allocator.hpp"
 
+#include <algorithm>
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
-#include <cassert>
 #include <memory>
-#include <algorithm>
 
 namespace Engine::Memory {
 
 // Helper function to check if the object will fit
-bool FreeListAllocator::try_allocate(AllocationHeader* block, const std::size_t alignment, const std::size_t size) noexcept 
+std::byte* FreeListAllocator::try_allocate(
+  FreeBlock* block,
+  const std::size_t alignment,
+  const std::size_t size,
+  std::byte*& data_start,
+  std::size_t& block_size) noexcept
 {
-  void* current_ptr = reinterpret_cast<void*>(reinterpret_cast<std::byte*>(block) + sizeof(AllocationHeader));  
+  if (block->size < sizeof(AllocationHeader) + size) return nullptr;
 
-  void* aligned_ptr = std::align(std::max(alignment, alignof(AllocationHeader)), size, current_ptr, block->size);
+  std::byte* const free_block_start = reinterpret_cast<std::byte*>(block);
 
-  if (aligned_ptr == nullptr) return false; 
+  void* current_ptr = free_block_start + sizeof(AllocationHeader);
+  std::size_t available_space = block->size - sizeof(AllocationHeader);
 
-  // Data fits
-  block->data_start = reinterpret_cast<std::byte*>(aligned_ptr);
-  block->size -= size;
+  void* aligned_ptr = std::align(std::max(alignment, alignof(AllocationHeader)), size, current_ptr, available_space);
+
+  if (aligned_ptr == nullptr) return nullptr;
+
+  data_start = reinterpret_cast<std::byte*>(aligned_ptr);
+
+  // Place the allocation header directly before the data starts
+  AllocationHeader* allocation_header = reinterpret_cast<AllocationHeader*>(data_start) - 1;
+  allocation_header->block_size = block_size;
+  allocation_header->padding = static_cast<std::size_t>(reinterpret_cast<std::byte*>(allocation_header) - free_block_start);
+
+  return data_start;
+
+
+
+  std::byte* allocation_end = data_start + size;
+
+  // The next free block must also be correctly aligned
+  const std::uintptr_t end_address = reinterpret_cast<std::uintptr_t>(allocation_end);
+  const std::uintptr_t aligned_end_address = (end_address + alignof(FreeBlock) - 1) & ~(alignof(FreeBlock) - 1);
+  std::byte* next_free_block_start = reinterpret_cast<std::byte*>(aligned_end_address);
+  std::byte* free_block_end = free_block_start + block->size;
+
+  // Consume the remainder if it is too small to store a FreeBlock
+  if (next_free_block_start > free_block_end ||
+      static_cast<std::size_t>(free_block_end - next_free_block_start) < sizeof(FreeBlock))
+  {
+    next_free_block_start = free_block_end;
+  }
+
+  block_size = static_cast<std::size_t>(next_free_block_start - free_block_start);
+
+  AllocationHeader* allocation_header =
+    reinterpret_cast<AllocationHeader*>(data_start) - 1;
+  allocation_header->block_size = block_size;
+  allocation_header->padding = static_cast<std::size_t>(
+    reinterpret_cast<std::byte*>(allocation_header) - free_block_start);
 
   return true;
-
 }
 
 FreeListAllocator::FreeListAllocator(void* ptr, std::size_t max_size) noexcept : 
   max_size_(max_size),
-  free_block_head_(reinterpret_cast<AllocationHeader*>(ptr))
+  free_block_head_(reinterpret_cast<FreeBlock*>(ptr))
 {
-  assert(max_size >= sizeof(AllocationHeader) && "Free list allocator memory is too small.");
+  assert(max_size >= sizeof(FreeBlock) && "Free list allocator memory is too small.");
   assert(ptr != nullptr && "Free list allocator intialized with a nullptr.");
+  assert(reinterpret_cast<std::uintptr_t>(ptr) % alignof(FreeBlock) == 0 &&
+         "Free list allocator memory is not correctly aligned.");
 
-  AllocationHeader* initial_block = reinterpret_cast<AllocationHeader*>(ptr);
+  FreeBlock* initial_block = reinterpret_cast<FreeBlock*>(ptr);
   initial_block->size = max_size;
-  initial_block->max_size = max_size;
   initial_block->next = nullptr;
-  initial_block->data_start = nullptr;
 }
 
 [[nodiscard]] void* FreeListAllocator::allocate(std::size_t size, std::size_t alignment) noexcept
 {
   assert(size > 0 && "Size must be greater than zero.");
-  assert((alignment > 0 && (alignment & (alignment - 1)) == 0) && "Alignment must be a power of two.");
+  assert((alignment > 0 && (alignment & (alignment - 1)) == 0) &&
+         "Alignment must be a power of two.");
 
-  if (free_block_head_ == nullptr) [[unlikely]] return nullptr;
-
-  AllocationHeader* prev = nullptr;
-  AllocationHeader* curr = free_block_head_; 
-
-  AllocationHeader* best_prev = nullptr;
-  AllocationHeader* best_curr = nullptr;
+  FreeBlock* prev = nullptr;
+  FreeBlock* curr = free_block_head_;
 
   // First fit
   while (curr != nullptr) 
   {
-    bool allocator_fits = try_allocate(curr, alignment, size);
-    if (allocator_fits) 
+    std::byte* free_block_start = reinterpret_cast<std::byte*>(curr);
+    std::size_t free_block_size = curr->size;
+    FreeBlock* next = curr->next;
+
+    std::byte* data_start = nullptr;
+    std::size_t block_size = 0;
+
+    if (try_allocate(curr, alignment, size, data_start, block_size))
     {
-      best_prev = prev;
-      best_curr = curr;
-      break;
+      std::byte* next_free_block_start = free_block_start + block_size;
+      std::byte* free_block_end = free_block_start + free_block_size;
+
+      if (next_free_block_start == free_block_end)
+      {
+        if (prev == nullptr) free_block_head_ = next;
+        else prev->next = next;
+      }
+      else
+      {
+        FreeBlock* next_free_block = reinterpret_cast<FreeBlock*>(next_free_block_start);
+        next_free_block->size = static_cast<std::size_t>(free_block_end - next_free_block_start);
+        next_free_block->next = next;
+
+        if (prev == nullptr) free_block_head_ = next_free_block;
+        else prev->next = next_free_block;
+      }
+
+      return reinterpret_cast<void*>(data_start);
     }
+
     prev = curr;
     curr = curr->next;
   }
 
-  // No fit found
-  if (best_curr == nullptr) [[unlikely]] return nullptr;
-
-  std::size_t block_size = best_curr->size;
-  std::size_t block_max_size = best_curr->max_size;
-  std::byte* block_data_start = best_curr->data_start;
-
-  if (block_size >= sizeof(AllocationHeader)) 
-  {
-    // Split the block
-    AllocationHeader* next_free_block = reinterpret_cast<AllocationHeader*>(block_data_start + size);
-
-    next_free_block->size = block_max_size - block_size;
-    next_free_block->next = best_curr->next;
-
-    best_curr->max_size = size;
-
-    if (best_prev == nullptr) 
-    {
-      free_block_head_ = next_free_block;
-    } 
-    else 
-    {
-      best_prev->next = next_free_block;
-    }
-  } 
-  else 
-  {
-    // Do not split, consume the entire block
-    if (best_prev == nullptr) 
-    {
-      free_block_head_ = best_curr->next;
-    } 
-    else 
-    {
-      best_prev->next = best_curr->next;
-    }
-  }
-
-  return reinterpret_cast<void*>(best_curr->data_start);
+  return nullptr;
 }
-
 
 void FreeListAllocator::deallocate(void* ptr, std::size_t bytes) noexcept 
 {
-  assert(ptr != nullptr && "Free list allocator cannot deallocate a nullptr.");
+  if (ptr == nullptr) return;
+  (void)bytes;
 
-  std::byte* payload_start = static_cast<std::byte*>(ptr);
+  std::byte* data_start = static_cast<std::byte*>(ptr);
+  AllocationHeader* allocation_header =
+    reinterpret_cast<AllocationHeader*>(data_start) - 1;
 
-  // The header pointer was stashed immediately before the payload at
-  // allocation time (see try_allocate), so this recovers the real header
-  // regardless of how much alignment padding was inserted.
-  AllocationHeader* freed_block = reinterpret_cast<AllocationHeader**>(payload_start)[-1];
+  std::byte* block_start =
+    reinterpret_cast<std::byte*>(allocation_header) - allocation_header->padding;
+  std::size_t block_size = allocation_header->block_size;
+  FreeBlock* freed_block = reinterpret_cast<FreeBlock*>(block_start);
 
-  assert(freed_block->data_start == payload_start &&
-         "Pointer does not match a live allocation from this allocator.");
-  assert(freed_block->max_size == bytes &&
-         "Deallocation size does not match the recorded allocation size.");
-
-  std::byte* block_start = reinterpret_cast<std::byte*>(freed_block);
-  std::size_t freed_size = freed_block->size;
-
-  // Find insertion point: first free block at or after freed_block's address.
-  AllocationHeader* prev = nullptr;
-  AllocationHeader* curr = free_block_head_;
+  // Find the correct position in the free list
+  FreeBlock* prev = nullptr;
+  FreeBlock* curr = free_block_head_;
   while (curr != nullptr && reinterpret_cast<std::byte*>(curr) < block_start) 
   {
     prev = curr;
     curr = curr->next;
   }
 
-  // Merge with prev, if adjacent.
+  // Merge with the previous free block
   if (prev != nullptr && reinterpret_cast<std::byte*>(prev) + prev->size == block_start) 
   {
-    prev->size += freed_size;
+    prev->size += block_size;
     freed_block = prev;
   } 
   else 
   {
-    freed_block->size = freed_size;
+    freed_block->size = block_size;
     freed_block->next = curr;
+
     if (prev == nullptr) free_block_head_ = freed_block;
     else prev->next = freed_block;
   }
 
-  // Merge with curr, if adjacent.
+  // Merge with the next free block
   if (curr != nullptr &&
       reinterpret_cast<std::byte*>(freed_block) + freed_block->size == reinterpret_cast<std::byte*>(curr)) 
   {
@@ -159,6 +173,5 @@ void FreeListAllocator::deallocate(void* ptr, std::size_t bytes) noexcept
     freed_block->next = curr->next;
   }
 }
-
 
 } // namespace Engine::Memory
