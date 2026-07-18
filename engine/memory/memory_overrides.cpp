@@ -1,27 +1,66 @@
 #include "memory_overrides.hpp"
 
+#include <new>
+#include <cstdlib>
+#include <cstdio>
+#include <atomic>
 
-void* operator new(std::size_t)
+namespace {
+  thread_local int external_scope_depth = 0;
+}
+
+ExternalAllocationScope::ExternalAllocationScope()
 {
-  assert(false && "Standard allocations are strictly forbidden!");
-  throw std::bad_alloc();
+  external_scope_depth++; 
 }
 
-
-void* operator new[](std::size_t)
+ExternalAllocationScope::~ExternalAllocationScope()
 {
-  assert(false && "Standard array allocations are strictly forbidden!");
-  throw std::bad_alloc();
+  external_scope_depth--; 
 }
 
-
-void operator delete(void* ptr) noexcept {
-  assert(false && "Standard deletions are stricly forbidden!");
-  __builtin_unreachable();
+namespace {
+struct Stats {
+  std::atomic<std::size_t> internal_allocations{0}; 
+  std::atomic<std::size_t> external_allocations{0}; 
+} stats;
 }
 
-
-void operator delete[](void* ptr) noexcept {
-  assert(false && "Standard array deletions are strictly forbidden!");
-  __builtin_unreachable();
+void* operator new(std::size_t size) 
+{
+  if (external_scope_depth > 0) stats.external_allocations++;
+  else stats.internal_allocations++;
+  return std::malloc(size);
 }
+
+void* operator new[](std::size_t size)
+{
+  if (external_scope_depth > 0) stats.external_allocations++;
+  else stats.internal_allocations++;
+  return std::malloc(size);
+}
+
+void operator delete(void* ptr) noexcept
+{
+  if (external_scope_depth > 0) stats.external_allocations++;
+  else stats.internal_allocations++;
+  std::free(ptr);
+}
+
+void operator delete[](void* ptr) noexcept  
+{
+  if (external_scope_depth > 0) stats.external_allocations++;
+  else stats.internal_allocations++;
+  std::free(ptr);
+}
+
+void MemoryTracker::report()
+{
+  std::printf("=== Allocation Report ===\n");
+  std::printf("External : %zu\n", stats.external_allocations.load());
+  std::printf("Internal : %zu\n", stats.internal_allocations.load());
+  if (stats.internal_allocations.load() > 0)
+      std::printf("WARNING: %zu internal allocation(s) detected!\n", stats.internal_allocations.load());
+  std::printf("=========================\n");
+}
+

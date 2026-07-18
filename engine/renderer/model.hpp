@@ -3,6 +3,8 @@
 #include "device.hpp"
 #include "buffer.hpp"
 
+#include "engine/containers/array.hpp"
+
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
@@ -52,9 +54,11 @@ public:
 
 private:
 
-  void createVertexBuffers(const std::vector<Vertex>& verticies);
+  template<typename Container>
+  void createVertexBuffers(const Container& vertices);
 
-  void createIndexBuffers(const std::vector<uint32_t>& indices);
+  template<typename Container>
+  void createIndexBuffers(const Container& indices);
 
 
   Device& device;

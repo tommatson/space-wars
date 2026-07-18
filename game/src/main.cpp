@@ -1,10 +1,10 @@
 #include "../../engine/core/application.hpp"
 #include "../../engine/network/network_manager.hpp"
+#include "../../engine/memory/memory_manager.hpp"
+#include "../../engine/memory/memory_overrides.hpp"
 
 #include "../../engine/scene/scene.hpp"
 #include "../scenes/main_menu.hpp"
-
-
 
 #include <cstdlib>
 #include <exception>
@@ -12,10 +12,21 @@
 #include <memory>
 #include <stdexcept>
 
+struct MemoryReportGuard {
+  ~MemoryReportGuard() {
+    MemoryTracker::report();
+  }
+};
+
 int main(){
+  MemoryReportGuard guard;
+
+  Engine::Memory::MemoryManager memory_manager;
+  memory_manager.init(256 * 1024 * 1024); // Default 256 MB
 
   Engine::Core::Application app(std::make_unique<Game::Scenes::MainMenu>());
   Engine::Network::NetworkManager networkManager;
+
 
   
   if(networkManager.initializeClient()){
@@ -39,7 +50,6 @@ int main(){
     std::cerr << e.what() << "\n";
     return EXIT_FAILURE;
   }
-
 
   return EXIT_SUCCESS;
 }
