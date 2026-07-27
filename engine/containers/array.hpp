@@ -23,17 +23,11 @@ public:
   front_ptr_(nullptr)
   {
   }
+
   ~Array()
   {
     clear();
-
-    if constexpr (requires { allocator_.deallocate(reinterpret_cast<void*>(front_ptr_), capacity_ * sizeof(T)); })
-    {
-      if (front_ptr_ != nullptr)
-      {
-        allocator_.deallocate(reinterpret_cast<void*>(front_ptr_), capacity_ * sizeof(T));
-      }
-    }
+    allocator_.deallocate(reinterpret_cast<void*>(front_ptr_), capacity_ * sizeof(T));
   };
 
   // ---------------------------------------------------------------------------
@@ -106,10 +100,7 @@ private:
     if (new_capacity <= capacity_) return;
 
     T* new_data  = reinterpret_cast<T*>(allocator_.allocate(new_capacity * sizeof(T), alignof(T)));
-    if (new_data == nullptr) [[unlikely]]
-    {
-      throw std::bad_alloc{};
-    }
+    if (new_data == nullptr) [[unlikely]] throw std::bad_alloc{};
 
     // Move in the existing elements
     for(std::size_t i = 0; i < size_; ++i){
@@ -119,10 +110,7 @@ private:
 
     if constexpr (requires { allocator_.deallocate(reinterpret_cast<void*>(front_ptr_), capacity_ * sizeof(T)); }) 
     {
-      if (front_ptr_ != nullptr)
-      {
-        allocator_.deallocate(reinterpret_cast<void*>(front_ptr_), capacity_ * sizeof(T));
-      }
+      allocator_.deallocate(reinterpret_cast<void*>(front_ptr_), capacity_ * sizeof(T));
     }
 
     front_ptr_ = new_data;
