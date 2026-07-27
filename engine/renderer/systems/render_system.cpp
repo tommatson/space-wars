@@ -86,9 +86,8 @@ void RenderSystem::renderGameObjects(FrameInfo& frameInfo){
     0, nullptr
   );
 
-  for (auto& kv : frameInfo.gameObjects){
-    auto& obj = kv.second;
-    if (obj.model == nullptr) continue;
+  for (auto* object : frameInfo.renderables){
+    auto& obj = *object;
     SimplePushConstantData push{};
     push.modelMatrix = obj.transform.mat4(); 
     push.normalMatrix = obj.transform.normalMatrix();

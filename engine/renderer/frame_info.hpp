@@ -2,12 +2,17 @@
 
 #include "camera.hpp"
 #include "game_object.hpp"
+#include "../containers/array.hpp"
+#include "../memory/linear_allocator.hpp"
 
 #include <vulkan/vulkan.h>
 
 #define MAX_LIGHTS 10 
 
 namespace Engine { namespace Renderer {
+
+using FrameGameObjectQueue =
+  Containers::Array<GameObject*, Memory::LinearAllocator>;
 
 struct PointLight {
   glm::vec4 position{};
@@ -29,7 +34,8 @@ struct FrameInfo {
   VkCommandBuffer commandBuffer;
   Camera& camera;
   VkDescriptorSet globalDescriptorSet;
-  GameObject::Map& gameObjects;
+  FrameGameObjectQueue& renderables;
+  FrameGameObjectQueue& pointLights;
 };
 
 } } // namespace Engine::Renderer
