@@ -75,9 +75,9 @@ void PointLightSystem::createPipeline(VkRenderPass renderPass){
 
 void PointLightSystem::update(FrameInfo& frameInfo, GlobalUbo& ubo){
   int lightIndex = 0;
-  for (auto& kv : frameInfo.gameObjects){
-    auto& obj = kv.second;
-    if(obj.pointLight == nullptr) continue;
+  for (auto* object : frameInfo.pointLights){
+    if (lightIndex == MAX_LIGHTS) break;
+    auto& obj = *object;
 
     ubo.pointLights[lightIndex].position = glm::vec4(obj.transform.translation, 1.0f);
     ubo.pointLights[lightIndex].color = glm::vec4(obj.color, obj.pointLight->lightIntensity);
@@ -101,9 +101,8 @@ void PointLightSystem::render(FrameInfo& frameInfo){
   );
 
 
-  for (auto& kv : frameInfo.gameObjects){
-    auto& obj = kv.second;
-    if(obj.pointLight == nullptr) continue;
+  for (auto* object : frameInfo.pointLights){
+    auto& obj = *object;
 
     PointLightPushConstants push{};
     push.position = glm::vec4(obj.transform.translation, 1.0f); 

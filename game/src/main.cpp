@@ -24,7 +24,10 @@ int main(){
   Engine::Memory::MemoryManager memory_manager;
   memory_manager.init(256 * 1024 * 1024); // Default 256 MB
 
-  Engine::Core::Application app(std::make_unique<Game::Scenes::MainMenu>());
+  Engine::Core::Application app(
+    std::make_unique<Game::Scenes::MainMenu>(),
+    memory_manager
+  );
   Engine::Network::NetworkManager networkManager;
 
 

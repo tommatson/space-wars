@@ -22,7 +22,13 @@
 
 namespace Engine::Core{
 
-Application::Application(std::unique_ptr<Scene::Scene> initialScene) : sceneManager(std::move(initialScene)){
+Application::Application(
+  std::unique_ptr<Scene::Scene> initialScene,
+  Memory::MemoryManager& memoryManager
+) :
+  sceneManager(std::move(initialScene)),
+  memoryManager(memoryManager)
+{
   globalPool = Renderer::DescriptorPool::Builder(device)
     .setMaxSets(Renderer::SwapChain::MAX_FRAMES_IN_FLIGHT)
     .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, Renderer::SwapChain::MAX_FRAMES_IN_FLIGHT)
@@ -104,6 +110,17 @@ void Application::run() {
     camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
 
     if(auto commandBuffer = renderer.beginFrame()){
+      memoryManager.clearFrameAllocator();
+      auto& frameAllocator = memoryManager.getFrameAllocator();
+      Renderer::FrameGameObjectQueue renderables{frameAllocator};
+      Renderer::FrameGameObjectQueue pointLights{frameAllocator};
+
+      for (auto& [id, gameObject] : sceneManager.getCurrentSceneGameObjects()){
+        (void)id;
+        if (gameObject.model != nullptr) renderables.push_back(&gameObject);
+        if (gameObject.pointLight != nullptr) pointLights.push_back(&gameObject);
+      }
+
       int frameIndex = renderer.getFrameIndex();
       Renderer::FrameInfo frameInfo{
         frameIndex,
@@ -111,7 +128,8 @@ void Application::run() {
         commandBuffer,
         camera,
         globalDescriptorSets[frameIndex],
-        sceneManager.getCurrentSceneGameObjects()
+        renderables,
+        pointLights
       };
 
       // update

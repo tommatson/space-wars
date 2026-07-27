@@ -10,6 +10,7 @@
 
 #include "../scene/scene_manager.hpp"
 #include "../scene/scene.hpp"
+#include "../memory/memory_manager.hpp"
 
 #include <memory>
 #include <vector>
@@ -22,7 +23,10 @@ public:
   static constexpr int HEIGHT = 600;
 
 
-  Application(std::unique_ptr<Scene::Scene> initialScene);
+  Application(
+    std::unique_ptr<Scene::Scene> initialScene,
+    Memory::MemoryManager& memoryManager
+  );
   ~Application();
 
   Application(const Application &) = delete;
@@ -47,6 +51,7 @@ private:
 
   ImGuiManager imguiManager;
   Scene::SceneManager sceneManager;
+  Memory::MemoryManager& memoryManager;
 };
 
 } // namespace Engine::Core
