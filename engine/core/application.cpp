@@ -5,6 +5,7 @@
 #include "../renderer/systems/render_system.hpp"
 #include "../renderer/systems/point_light_system.hpp"
 #include "../renderer/buffer.hpp"
+#include "../profiling/profiler.hpp"
 
 
 
@@ -46,6 +47,9 @@ Application::~Application(){
 
 
 void Application::run() {
+  PROFILE_ZONE_NAMED("Application::run");
+  constexpr char applicationInfo[] = "Space Wars | Vulkan renderer";
+  PROFILE_APP_INFO(applicationInfo, sizeof(applicationInfo) - 1);
 
   std::vector<std::unique_ptr<Renderer::Buffer>> uboBuffers(Renderer::SwapChain::MAX_FRAMES_IN_FLIGHT);
   for (int i = 0; i < uboBuffers.size(); i++){
@@ -89,20 +93,27 @@ void Application::run() {
   auto currentTime = std::chrono::high_resolution_clock::now();
 
   while(!window.shouldClose()){
-    glfwPollEvents();
+    {
+      PROFILE_ZONE_NAMED("Poll events");
+      glfwPollEvents();
+    }
 
     
     auto newTime = std::chrono::high_resolution_clock::now();
     float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
     currentTime = newTime;
+    PROFILE_PLOT("Frame time (ms)", frameTime * 1000.0f);
 
     // frameTime = glm::min(frameTime, MAX_FRAME_TIME);
 
     // Update current scene
-    sceneManager.getCurrentScene()->update(frameTime);
+    {
+      PROFILE_ZONE_NAMED("Scene update");
+      sceneManager.getCurrentScene()->update(frameTime);
 
-    cameraController.moveInPlaneXZ(window.getGLFWwindow(), frameTime, viewerObject);
-    camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
+      cameraController.moveInPlaneXZ(window.getGLFWwindow(), frameTime, viewerObject);
+      camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
+    }
 
 
 
@@ -110,15 +121,19 @@ void Application::run() {
     camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
 
     if(auto commandBuffer = renderer.beginFrame()){
+      PROFILE_ZONE_NAMED("Build and render frame");
       memoryManager.clearFrameAllocator();
       auto& frameAllocator = memoryManager.getFrameAllocator();
       Renderer::FrameGameObjectQueue renderables{frameAllocator};
       Renderer::FrameGameObjectQueue pointLights{frameAllocator};
 
-      for (auto& [id, gameObject] : sceneManager.getCurrentSceneGameObjects()){
-        (void)id;
-        if (gameObject.model != nullptr) renderables.push_back(&gameObject);
-        if (gameObject.pointLight != nullptr) pointLights.push_back(&gameObject);
+      {
+        PROFILE_ZONE_NAMED("Build render queues");
+        for (auto& [id, gameObject] : sceneManager.getCurrentSceneGameObjects()){
+          (void)id;
+          if (gameObject.model != nullptr) renderables.push_back(&gameObject);
+          if (gameObject.pointLight != nullptr) pointLights.push_back(&gameObject);
+        }
       }
 
       int frameIndex = renderer.getFrameIndex();
@@ -136,18 +151,27 @@ void Application::run() {
       Renderer::GlobalUbo ubo{};
       ubo.projection = camera.getProjection(); 
       ubo.view = camera.getView();
-      pointLightSystem.update(frameInfo, ubo);
-      uboBuffers[frameIndex]->writeToBuffer(&ubo);
-      uboBuffers[frameIndex]->flush();
+      {
+        PROFILE_ZONE_NAMED("Update GPU data");
+        pointLightSystem.update(frameInfo, ubo);
+        uboBuffers[frameIndex]->writeToBuffer(&ubo);
+        uboBuffers[frameIndex]->flush();
+      }
       // render 
-      renderer.beginSwapChainRenderPass(commandBuffer);
-      renderSystem.renderGameObjects(frameInfo);
-      pointLightSystem.render(frameInfo);
+      {
+        PROFILE_ZONE_NAMED("Record world render commands");
+        renderer.beginSwapChainRenderPass(commandBuffer);
+        renderSystem.renderGameObjects(frameInfo);
+        pointLightSystem.render(frameInfo);
+      }
 
       // ImGui render
-      imguiManager.newFrame();
-      sceneManager.getCurrentScene()->renderUI();
-      imguiManager.render(commandBuffer);
+      {
+        PROFILE_ZONE_NAMED("Record UI render commands");
+        imguiManager.newFrame();
+        sceneManager.getCurrentScene()->renderUI();
+        imguiManager.render(commandBuffer);
+      }
 
       renderer.endSwapChainRenderPass(commandBuffer);
       renderer.endFrame();
@@ -155,6 +179,7 @@ void Application::run() {
 
     // Process any pending scene switch (after frame is done)
     sceneManager.processPendingSceneSwitch(device);
+    PROFILE_FRAME();
   } 
   vkDeviceWaitIdle(device.device());
 

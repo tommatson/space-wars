@@ -1,4 +1,5 @@
 #include "swap_chain.hpp"
+#include "../profiling/profiler.hpp"
 
 // std
 #include <array>
@@ -67,6 +68,7 @@ SwapChain::~SwapChain() {
 }
 
 VkResult SwapChain::acquireNextImage(uint32_t *imageIndex) {
+  PROFILE_ZONE();
   vkWaitForFences(
       device.device(),
       1,
@@ -87,6 +89,7 @@ VkResult SwapChain::acquireNextImage(uint32_t *imageIndex) {
 
 VkResult SwapChain::submitCommandBuffers(
     const VkCommandBuffer *buffers, uint32_t *imageIndex) {
+  PROFILE_ZONE();
   if (imagesInFlight[*imageIndex] != VK_NULL_HANDLE) {
     vkWaitForFences(device.device(), 1, &imagesInFlight[*imageIndex], VK_TRUE, UINT64_MAX);
   }
@@ -109,9 +112,12 @@ VkResult SwapChain::submitCommandBuffers(
   submitInfo.pSignalSemaphores = signalSemaphores;
 
   vkResetFences(device.device(), 1, &inFlightFences[currentFrame]);
-  if (vkQueueSubmit(device.graphicsQueue(), 1, &submitInfo, inFlightFences[currentFrame]) !=
-      VK_SUCCESS) {
-    throw std::runtime_error("failed to submit draw command buffer!");
+  {
+    PROFILE_ZONE_NAMED("Vulkan queue submit");
+    if (vkQueueSubmit(device.graphicsQueue(), 1, &submitInfo, inFlightFences[currentFrame]) !=
+        VK_SUCCESS) {
+      throw std::runtime_error("failed to submit draw command buffer!");
+    }
   }
 
   VkPresentInfoKHR presentInfo = {};
@@ -126,7 +132,11 @@ VkResult SwapChain::submitCommandBuffers(
 
   presentInfo.pImageIndices = imageIndex;
 
-  auto result = vkQueuePresentKHR(device.presentQueue(), &presentInfo);
+  VkResult result;
+  {
+    PROFILE_ZONE_NAMED("Vulkan queue present");
+    result = vkQueuePresentKHR(device.presentQueue(), &presentInfo);
+  }
 
   currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 

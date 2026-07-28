@@ -1,5 +1,6 @@
 
 #include "renderer.hpp"
+#include "../profiling/profiler.hpp"
 
 
 #include <memory>
@@ -74,6 +75,7 @@ void Renderer::freeCommandBuffers(){
 
 
 VkCommandBuffer Renderer::beginFrame(){
+  PROFILE_ZONE();
   assert(!isFrameStarted && "Can't call begin frame while already in progress");
   
 
@@ -103,6 +105,7 @@ VkCommandBuffer Renderer::beginFrame(){
   return commandBuffer;
 }
 void Renderer::endFrame(){
+  PROFILE_ZONE();
   assert(isFrameStarted && "Can't call end frame whilst frame is not in progress");
   auto commandBuffer = getCurrentCommandBuffer();
 
@@ -124,6 +127,7 @@ void Renderer::endFrame(){
 
 }
 void Renderer::beginSwapChainRenderPass(VkCommandBuffer commandBuffer){
+  PROFILE_ZONE();
   assert(isFrameStarted && "Cannot call beginSwapChainRenderPass if frame is not in progress");
   assert(commandBuffer == getCurrentCommandBuffer() && "Can't begin render pass on command buffer from a different frame");
 
@@ -160,6 +164,7 @@ void Renderer::beginSwapChainRenderPass(VkCommandBuffer commandBuffer){
 
 }
 void Renderer::endSwapChainRenderPass(VkCommandBuffer commandBuffer){
+  PROFILE_ZONE();
   assert(isFrameStarted && "Cannot call endSwapChainRenderPass if frame is not in progress");
   assert(commandBuffer == getCurrentCommandBuffer() && "Can't end render pass on command buffer from a different frame");
 
