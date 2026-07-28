@@ -4,6 +4,15 @@ CXX = g++
 CXXFLAGS = -std=c++23 -I. -I$(VULKAN_SDK_PATH)/include -I$(STB_INCLUDE_PATH) -I$(TINYOBJ_INCLUDE_PATH) -I$(IMGUI_DIR) -include engine/memory/memory_overrides.hpp
 LDFLAGS = -L$(VULKAN_SDK_PATH)/lib -Wl,-rpath,$(VULKAN_SDK_PATH)/lib `pkg-config --static --libs glfw3` -lvulkan
 
+# Opt-in profiling keeps release/development builds free of profiler overhead.
+# Usage: make clean && make PROFILE=1
+PROFILE ?= 0
+TRACY_DIR = extern/tracy
+ifeq ($(PROFILE),1)
+CXXFLAGS += -DENABLE_PROFILING -DTRACY_ENABLE -I$(TRACY_DIR)/public
+TRACY_SRCS = $(TRACY_DIR)/public/TracyClient.cpp
+endif
+
 ENGINE_DIR = engine
 MEMORY_DIR = $(ENGINE_DIR)/memory
 RENDERER_DIR = $(ENGINE_DIR)/renderer
@@ -25,6 +34,7 @@ SOCKETS_BUILD_DIR = $(BUILD_DIR)/engine/network/sockets
 SCENE_BUILD_DIR = $(BUILD_DIR)/engine/scene
 CORE_BUILD_DIR = $(BUILD_DIR)/engine/core
 IMGUI_BUILD_DIR = $(BUILD_DIR)/extern/imgui
+TRACY_BUILD_DIR = $(BUILD_DIR)/extern/tracy
 GAME_SRC_BUILD_DIR = $(BUILD_DIR)/game/src
 GAME_SCENES_BUILD_DIR = $(BUILD_DIR)/game/scenes
 GAME_BUILD_DIR = $(GAME_SRC_BUILD_DIR)
@@ -49,7 +59,8 @@ SOCKETS_OBJS = $(SOCKETS_SRCS:$(SOCKETS_DIR)/%.cpp=$(SOCKETS_BUILD_DIR)/%.o)
 SCENE_OBJS = $(SCENE_SRCS:$(SCENE_DIR)/%.cpp=$(SCENE_BUILD_DIR)/%.o)
 CORE_OBJS = $(CORE_SRCS:$(CORE_DIR)/%.cpp=$(CORE_BUILD_DIR)/%.o)
 IMGUI_OBJS = $(IMGUI_SRCS:$(IMGUI_DIR)/%.cpp=$(IMGUI_BUILD_DIR)/%.o)
-OBJS = $(MEMORY_OBJS) $(GAME_OBJS) $(RENDERER_OBJS) $(SYSTEMS_OBJS) $(NETWORK_OBJS) $(SOCKETS_OBJS) $(SCENE_OBJS) $(CORE_OBJS) $(IMGUI_OBJS)
+TRACY_OBJS = $(TRACY_SRCS:$(TRACY_DIR)/public/%.cpp=$(TRACY_BUILD_DIR)/%.o)
+OBJS = $(MEMORY_OBJS) $(GAME_OBJS) $(RENDERER_OBJS) $(SYSTEMS_OBJS) $(NETWORK_OBJS) $(SOCKETS_OBJS) $(SCENE_OBJS) $(CORE_OBJS) $(IMGUI_OBJS) $(TRACY_OBJS)
 
 VERT_SRCS = $(wildcard shaders/*.vert)
 FRAG_SRCS = $(wildcard shaders/*.frag)
@@ -96,8 +107,11 @@ $(CORE_BUILD_DIR)/%.o: $(CORE_DIR)/%.cpp | dirs
 $(IMGUI_BUILD_DIR)/%.o: $(IMGUI_DIR)/%.cpp | dirs
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
+$(TRACY_BUILD_DIR)/%.o: $(TRACY_DIR)/public/%.cpp | dirs
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
 dirs:
-	mkdir -p $(BUILD_DIR) $(MEMORY_BUILD_DIR) $(RENDERER_BUILD_DIR) $(SYSTEMS_BUILD_DIR) $(NETWORK_BUILD_DIR) $(SOCKETS_BUILD_DIR) $(GAME_BUILD_DIR) $(SCENE_BUILD_DIR) $(CORE_BUILD_DIR) $(IMGUI_BUILD_DIR)
+	mkdir -p $(BUILD_DIR) $(MEMORY_BUILD_DIR) $(RENDERER_BUILD_DIR) $(SYSTEMS_BUILD_DIR) $(NETWORK_BUILD_DIR) $(SOCKETS_BUILD_DIR) $(GAME_BUILD_DIR) $(SCENE_BUILD_DIR) $(CORE_BUILD_DIR) $(IMGUI_BUILD_DIR) $(TRACY_BUILD_DIR)
 
 clean:
 	rm -rf $(BUILD_DIR)
