@@ -15,6 +15,7 @@ endif
 
 ENGINE_DIR = engine
 MEMORY_DIR = $(ENGINE_DIR)/memory
+ECS_DIR = $(ENGINE_DIR)/ecs
 RENDERER_DIR = $(ENGINE_DIR)/renderer
 SYSTEMS_DIR = $(RENDERER_DIR)/systems
 NETWORK_DIR = $(ENGINE_DIR)/network
@@ -29,6 +30,7 @@ BUILD_DIR = build
 RENDERER_BUILD_DIR = $(BUILD_DIR)/engine/renderer
 SYSTEMS_BUILD_DIR = $(BUILD_DIR)/engine/renderer/systems
 MEMORY_BUILD_DIR = $(BUILD_DIR)/engine/memory
+ECS_BUILD_DIR = $(BUILD_DIR)/engine/ecs
 NETWORK_BUILD_DIR = $(BUILD_DIR)/engine/network
 SOCKETS_BUILD_DIR = $(BUILD_DIR)/engine/network/sockets
 SCENE_BUILD_DIR = $(BUILD_DIR)/engine/scene
@@ -41,6 +43,7 @@ GAME_BUILD_DIR = $(GAME_SRC_BUILD_DIR)
 TARGET = $(BUILD_DIR)/space-wars
 
 MEMORY_SRCS = $(wildcard $(MEMORY_DIR)/*.cpp)
+ECS_SRCS = $(wildcard $(ECS_DIR)/*.cpp)
 GAME_SRCS = $(wildcard $(GAME_DIR)/*.cpp)
 RENDERER_SRCS = $(wildcard $(RENDERER_DIR)/*.cpp)
 SYSTEMS_SRCS = $(wildcard $(SYSTEMS_DIR)/*.cpp)
@@ -51,6 +54,7 @@ CORE_SRCS = $(wildcard $(CORE_DIR)/*.cpp)
 IMGUI_SRCS = $(wildcard $(IMGUI_DIR)/*.cpp)
 
 MEMORY_OBJS = $(MEMORY_SRCS:$(MEMORY_DIR)/%.cpp=$(MEMORY_BUILD_DIR)/%.o)
+ECS_OBJS = $(ECS_SRCS:$(ECS_DIR)/%.cpp=$(ECS_BUILD_DIR)/%.o)
 GAME_OBJS = $(GAME_SRCS:$(GAME_DIR)/%.cpp=$(GAME_BUILD_DIR)/%.o)
 RENDERER_OBJS = $(RENDERER_SRCS:$(RENDERER_DIR)/%.cpp=$(RENDERER_BUILD_DIR)/%.o)
 SYSTEMS_OBJS = $(SYSTEMS_SRCS:$(SYSTEMS_DIR)/%.cpp=$(SYSTEMS_BUILD_DIR)/%.o)
@@ -60,7 +64,7 @@ SCENE_OBJS = $(SCENE_SRCS:$(SCENE_DIR)/%.cpp=$(SCENE_BUILD_DIR)/%.o)
 CORE_OBJS = $(CORE_SRCS:$(CORE_DIR)/%.cpp=$(CORE_BUILD_DIR)/%.o)
 IMGUI_OBJS = $(IMGUI_SRCS:$(IMGUI_DIR)/%.cpp=$(IMGUI_BUILD_DIR)/%.o)
 TRACY_OBJS = $(TRACY_SRCS:$(TRACY_DIR)/public/%.cpp=$(TRACY_BUILD_DIR)/%.o)
-OBJS = $(MEMORY_OBJS) $(GAME_OBJS) $(RENDERER_OBJS) $(SYSTEMS_OBJS) $(NETWORK_OBJS) $(SOCKETS_OBJS) $(SCENE_OBJS) $(CORE_OBJS) $(IMGUI_OBJS) $(TRACY_OBJS)
+OBJS = $(MEMORY_OBJS) $(ECS_OBJS) $(GAME_OBJS) $(RENDERER_OBJS) $(SYSTEMS_OBJS) $(NETWORK_OBJS) $(SOCKETS_OBJS) $(SCENE_OBJS) $(CORE_OBJS) $(IMGUI_OBJS) $(TRACY_OBJS)
 
 VERT_SRCS = $(wildcard shaders/*.vert)
 FRAG_SRCS = $(wildcard shaders/*.frag)
@@ -81,6 +85,9 @@ $(TARGET): $(OBJS) | dirs
 	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
 
 $(MEMORY_BUILD_DIR)/%.o: $(MEMORY_DIR)/%.cpp | dirs
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(ECS_BUILD_DIR)/%.o: $(ECS_DIR)/%.cpp | dirs
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(GAME_BUILD_DIR)/%.o: $(GAME_DIR)/%.cpp | dirs
@@ -111,7 +118,7 @@ $(TRACY_BUILD_DIR)/%.o: $(TRACY_DIR)/public/%.cpp | dirs
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 dirs:
-	mkdir -p $(BUILD_DIR) $(MEMORY_BUILD_DIR) $(RENDERER_BUILD_DIR) $(SYSTEMS_BUILD_DIR) $(NETWORK_BUILD_DIR) $(SOCKETS_BUILD_DIR) $(GAME_BUILD_DIR) $(SCENE_BUILD_DIR) $(CORE_BUILD_DIR) $(IMGUI_BUILD_DIR) $(TRACY_BUILD_DIR)
+	mkdir -p $(BUILD_DIR) $(MEMORY_BUILD_DIR) $(ECS_BUILD_DIR) $(RENDERER_BUILD_DIR) $(SYSTEMS_BUILD_DIR) $(NETWORK_BUILD_DIR) $(SOCKETS_BUILD_DIR) $(GAME_BUILD_DIR) $(SCENE_BUILD_DIR) $(CORE_BUILD_DIR) $(IMGUI_BUILD_DIR) $(TRACY_BUILD_DIR)
 
 clean:
 	rm -rf $(BUILD_DIR)
