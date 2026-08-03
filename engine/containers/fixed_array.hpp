@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cassert>
 #include <new>
+#include <stdexcept>
 #include <utility>
 #include "allocator_concepts.hpp"
 
@@ -13,15 +14,38 @@ namespace Engine::Containers {
 template<typename T, Allocator A>
 class FixedArray {
 public:
-  FixedArray(A& allocator, std::size_t capacity) : 
+  FixedArray(A& allocator, std::size_t capacity) :
+  data_(nullptr),
   allocator_(allocator),
   size_(0),
   capacity_(capacity)
   {
+    if (capacity_ == 0) return;
 
+    data_ = reinterpret_cast<T*>(
+      allocator_.allocate(capacity_ * sizeof(T), alignof(T))
+    );
+
+    if (data_ == nullptr) [[unlikely]] throw std::bad_alloc{};
   }
 
-  ~FixedArray();
+  ~FixedArray()
+  {
+    clear();
+
+    if constexpr (requires {
+      allocator_.deallocate(reinterpret_cast<void*>(data_), capacity_ * sizeof(T));
+    })
+    {
+      if (data_ != nullptr)
+      {
+        allocator_.deallocate(
+          reinterpret_cast<void*>(data_),
+          capacity_ * sizeof(T)
+        );
+      }
+    }
+  }
 
 
   FixedArray(const FixedArray&) = delete;
@@ -45,8 +69,10 @@ public:
   
   void push_back(T data) 
   {
-    // Check capacity
-    if (size_ == capacity_) [[unlikely]] reserve(capacity_ ? capacity_ * 2 : 8);
+    if (size_ == capacity_) [[unlikely]]
+    {
+      throw std::length_error("FixedArray capacity exceeded.");
+    }
 
     new (data_ + size_) T(std::move(data));
 
@@ -65,7 +91,12 @@ public:
   {
     assert(i < size_ && "Index out of range.");
     return data_[i];
+  }
 
+  T& operator[](std::size_t i)
+  {
+    assert(i < size_ && "Index out of range.");
+    return data_[i];
   }
 
   void clear() 
@@ -98,37 +129,6 @@ private:
 
   std::size_t size_; 
   std::size_t capacity_;
-
-
-  void reserve(std::size_t new_capacity)
-  {
-    if (new_capacity <= capacity_) return;
-
-    T* new_data  = reinterpret_cast<T*>(allocator_.allocate(new_capacity * sizeof(T), alignof(T)));
-    if (new_data == nullptr) [[unlikely]] throw std::bad_alloc{};
-
-    // Move in the existing elements
-    for(std::size_t i = 0; i < size_; ++i){
-      new (new_data + i) T(std::move(data_[i])); 
-      data_[i].~T();
-    }
-
-    if constexpr (requires { allocator_.deallocate(reinterpret_cast<void*>(data_), capacity_ * sizeof(T)); }) 
-    {
-      allocator_.deallocate(reinterpret_cast<void*>(data_), capacity_ * sizeof(T));
-    }
-
-    data_ = new_data;
-    capacity_ = new_capacity;
-
-  }
-
-  
-
-
-
-
-
 };
 
 
