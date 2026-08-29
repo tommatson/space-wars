@@ -4,13 +4,6 @@
 
 namespace Engine::ECS {
 
-EntityManager::EntityManager() noexcept
-{
-  for (std::uint32_t index = 0; index < MAX_ENTITIES; ++index)
-  {
-    free_indices_[MAX_ENTITIES - index - 1] = index;
-  }
-}
 
 [[nodiscard]] Entity EntityManager::create() noexcept
 {

@@ -2,17 +2,20 @@
 
 #include "entity.hpp"
 
-#include <array>
-#include <cstdint>
+#include "../containers/fixed_array.hpp"
+#include "../memory/free_list_allocator.hpp"
+#include "../containers/allocator_concepts.hpp"
 
 namespace Engine::ECS {
-
+template<Containers::Allocator A>
 class EntityManager{
 public:
   // ---------------------------------------------------------------------------
   // Leaders
   // ---------------------------------------------------------------------------
-  EntityManager() noexcept;
+  EntityManager(A allocator ) noexcept : allocator_{allocator} 
+  {
+  }
   ~EntityManager() = default;
 
   // ---------------------------------------------------------------------------
@@ -31,10 +34,13 @@ public:
   [[nodiscard]] bool is_alive(Entity entity) const noexcept;
 
 private:
-  std::array<std::uint32_t, MAX_ENTITIES> generations_{};
-  std::array<bool, MAX_ENTITIES> alive_{};
-  std::array<std::uint32_t, MAX_ENTITIES> free_indices_{};
-  std::uint32_t free_count_ = MAX_ENTITIES;
+  A allocator_;
+  const std::size_t MAX_ENTITIES = 100;
+
+
+  Containers::FixedArray<Entity, Memory::FreeListAllocator> entity_array_();
+
+
 };
 
 } // namespace Engine::ECS
