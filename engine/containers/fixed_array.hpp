@@ -4,6 +4,7 @@
 #include <cassert>
 #include <new>
 #include <stdexcept>
+#include <type_traits>
 #include <utility>
 #include "allocator_concepts.hpp"
 
@@ -69,14 +70,20 @@ public:
   
   void push_back(T data) 
   {
+    emplace_back(std::move(data));
+  }
+
+  template<typename... Args>
+  T& emplace_back(Args&&... args)
+  {
     if (size_ == capacity_) [[unlikely]]
     {
       throw std::length_error("FixedArray capacity exceeded.");
     }
 
-    new (data_ + size_) T(std::move(data));
-
+    T* element = new (data_ + size_) T(std::forward<Args>(args)...);
     ++size_;
+    return *element;
   }
   
   void pop_back()
@@ -85,6 +92,34 @@ public:
 
     data_[--size_].~T();
   };
+
+  T& back()
+  {
+    assert(size_ > 0 && "Array must contain an element to access back.");
+    return data_[size_ - 1];
+  }
+
+  const T& back() const
+  {
+    assert(size_ > 0 && "Array must contain an element to access back.");
+    return data_[size_ - 1];
+  }
+
+  void swap_remove(std::size_t index)
+    noexcept(std::is_nothrow_move_constructible_v<T>)
+  {
+    assert(index < size_ && "Index out of range.");
+
+    const std::size_t last = size_ - 1;
+    if (index != last)
+    {
+      data_[index].~T();
+      new (data_ + index) T(std::move(data_[last]));
+    }
+
+    data_[last].~T();
+    --size_;
+  }
 
 
   const T& operator[](std::size_t i) const
